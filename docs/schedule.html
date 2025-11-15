@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 生活助手 | 日程管理 (v2)</title>
+    <style>
+        /* * 1. 全局与主题变量 (Global & Theme Variables)
+         */
+        :root {
+            --bg-color: #F8F6F5;
+            --card-color: #FFFFFF;
+            --text-color: #010101;
+            --text-secondary: #6B6B6B;
+            --highlight-1: #F69AAC; /* 工作 */
+            --highlight-2: #DF95E3; /* 生活 */
+            --highlight-3: #7DBDE9; /* 学习 */
+            --gradient-main: linear-gradient(90deg, var(--highlight-1) 0%, var(--highlight-2) 50%, var(--highlight-3) 100%);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+        }
+
+        /* * 2. 侧边栏导航 (Sidebar Navigation)
+         */
+        .sidebar {
+            width: 240px;
+            background: var(--card-color);
+            border-right: 1px solid #ECECEC;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            flex-shrink: 0;
+        }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 40px;
+            padding-left: 8px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav li a {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar nav li a .icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 14px;
+            opacity: 0.7;
+        }
+
+        .sidebar nav li a:hover {
+            background: #F0F0F0;
+            color: var(--text-color);
+        }
+
+        .sidebar nav li a.active {
+            background: var(--gradient-main);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 15px -5px var(--highlight-2);
+        }
+
+        .sidebar nav li a.active .icon {
+            opacity: 1;
+        }
+
+        .sidebar .user-profile {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+            background: #F0F0F0;
+        }
+
+        .sidebar .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+        
+        /* ... (user-profile styles) ... */
+
+        /* * 3. 主内容区域 (Main Content)
+         */
+        .main-content {
+            flex-grow: 1;
+            padding: 32px;
+            overflow: hidden; /* 优化：主区域不滚动，让周视图自己滚动 */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-shrink: 0;
+        }
+
+        .header .title .title-zh {
+            font-size: 2.5rem; /* 36px */
+            font-weight: 900;
+            line-height: 1.1;
+        }
+
+        .header .title .title-en {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-gradient {
+            background: var(--gradient-main);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 15px -5px var(--highlight-2);
+            transition: transform 0.2s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+        }
+
+        /* * 4. Bento 卡片 (Bento Card)
+         */
+        .bento-card {
+            background-color: var(--card-color);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .bento-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 卡片标题 */
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        
+        .card-header .icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 12px;
+        }
+
+        .card-header .title-wrapper .title-zh {
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .card-header .title-wrapper .title-en {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .card-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 允许内容滚动 */
+        }
+
+
+        /* * 5. 【优化】日程页特定布局 (Schedule Page Layout)
+         */
+        .schedule-layout {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr; /* 左侧 2.5 份，右侧 1 份 */
+            grid-template-rows: auto 1fr; /* 确保行高自适应 */
+            gap: 20px;
+            flex-grow: 1; /* 占据剩余所有空间 */
+            min-height: 0; /* 修正 flex bug */
+        }
+        
+        /* 日历卡片 (左侧) */
+        .calendar-card {
+            grid-row: 1 / 3; /* 跨越 2 行，占据左侧全部高度 */
+            padding: 0; /* 日历卡片通常不需要内边距 */
+            overflow: hidden; /* 内部滚动 */
+        }
+
+        /* 右侧卡片 (Agenda 和 AI) */
+        .agenda-card {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        .ai-suggestion-card {
+            grid-column: 2;
+            grid-row: 2;
+            background-color: #010101; /* 深色卡片 */
+            color: #FFFFFF;
+        }
+        .ai-suggestion-card .card-header .title-wrapper .title-zh {
+            color: #FFFFFF;
+        }
+        .ai-suggestion-card .card-header .title-wrapper .title-en {
+            color: #AAAAAA;
+        }
+        
+        /* * 6. 【优化】日历头部 (Calendar Header)
+         */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 16px 24px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+        
+        .calendar-header .month-year {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        /* 【新增】视图切换 */
+        .view-toggles {
+            display: flex;
+            background: #F0F0F0;
+            border-radius: 10px;
+            padding: 4px;
+        }
+        .view-toggles button {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .view-toggles button.active {
+            background: var(--card-color);
+            color: var(--text-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        /* * 7. 【新增】周视图 (Weekly View / Gantt)
+         */
+        .week-view-container {
+            flex-grow: 1;
+            overflow-y: auto; /* 核心：允许时间轴滚动 */
+            padding: 0 24px;
+        }
+        
+        .week-view-grid {
+            display: grid;
+            grid-template-columns: 60px repeat(7, 1fr); /* 1 时间列, 7 日期列 */
+            /* 1 头部行, 15 小时行 (8am - 10pm) */
+            grid-template-rows: 60px repeat(15, 60px); 
+            position: relative;
+        }
+        
+        /* 头部 - 星期 */
+        .day-header {
+            text-align: center;
+            padding-top: 16px;
+            font-weight: 600;
+            position: sticky; /* 粘性头部 */
+            top: 0;
+            background: var(--card-color);
+            z-index: 10;
+        }
+        .day-header .day-name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .day-header .day-number {
+            font-size: 1.3rem;
+        }
+        .day-header.today .day-number {
+            background: var(--highlight-3);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 侧栏 - 时间 */
+        .time-slot {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding-top: 8px;
+            grid-column: 1;
+            text-align: right;
+            padding-right: 12px;
+        }
+        
+        /* 网格线 */
+        .day-column-bg {
+            grid-row: 2 / span 15; /* 跨越所有小时 */
+            border-left: 1px solid #F0F0F0;
+        }
+        .day-column-bg:last-child {
+            border-right: 1px solid #F0F0F0;
+        }
+        
+        /* 日程事件块 */
+        .event-block {
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin: 2px 4px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            overflow: hidden;
+            z-index: 5;
+            /* 透明度渐变 */
+            background-image: linear-gradient(to bottom, 
+                rgba(255,255,255,0.3), 
+                rgba(255,255,255,0)
+            );
+        }
+        .event-block .title-zh {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+        .event-block .title-en {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        
+        /* 放置示例 */
+        .event-1 {
+            grid-column: 2; /* 周一 */
+            grid-row: 8 / 10; /* 14:00 - 16:00 (8+6=14, 8+8=16) */
+            background-color: var(--highlight-1);
+        }
+        .event-2 {
+            grid-column: 4; /* 周三 */
+            grid-row: 3 / 6; /* 09:00 - 12:00 */
+            background-color: var(--highlight-2);
+        }
+        .event-3 {
+            grid-column: 5; /* 周四 (今天) */
+            grid-row: 9 / 10; /* 15:00 - 16:00 */
+            background-color: var(--highlight-3);
+        }
+         .event-4 {
+            grid-column: 5; /* 周四 (今天) */
+            grid-row: 13 / 15; /* 19:00 - 21:00 */
+            background-color: var(--highlight-2);
+        }
+
+
+        /* * 8. 【优化】右侧日程列表 (Agenda List)
+         */
+        .schedule-list {
+            list-style: none;
+            margin-top: 10px;
+            flex-grow: 1; /* 占据剩余空间 */
+            overflow-y: auto; /* 允许列表滚动 */
+        }
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .schedule-item .time {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-color);
+            width: 50px;
+        }
+        .schedule-item .divider {
+            width: 4px;
+            height: 28px;
+            border-radius: 2px;
+            background: var(--highlight-1);
+            margin-right: 12px;
+        }
+        .schedule-item.item-2 .divider { background: var(--highlight-2); }
+        .schedule-item.item-3 .divider { background: var(--highlight-3); }
+
+        .schedule-item .title {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        /* AI 建议卡片内容 */
+        .ai-suggestion-card .card-content {
+            overflow-y: auto;
+        }
+        .ai-suggestion-card .insight-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #D1D1D1;
+            margin-top: 16px;
+        }
+        .ai-suggestion-card .insight-body strong {
+            color: var(--highlight-2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. 侧边栏 (Sidebar) -->
+    <nav class="sidebar">
+        <div class="logo">AI Assistant</div>
+        <nav>
+            <ul>
+                <!-- 链接更新 -->
+                <li><a href="index.html">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    仪表盘 <span style="font-size: 10px; margin-left: 4px;">Dashboard</span>
+                </a></li>
+                
+                <!-- 【已激活】 -->
+                <li><a href="schedule.html" class="active">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    日程管理 <span style="font-size: 10px; margin-left: 4px;">Schedule</span>
+                </a></li>
+                
+                <li><a href="finance.html">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v0m0 0v0m-4.599 1C7.91 8.402 7 7.11 7 6s.91-2.402 2-3m5.599 1c.51-.598 1.489-1 2.599-1s2.08.402 2.599 1M19 6s-.91-2.402-2-3m-7 14v4m-3-4v4m10-4v4M5 20h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z"></path></svg>
+                    财务助手 <span style="font-size: 10px; margin-left: 4px;">Finance</span>
+                </a></li>
+                <li><a href="diet.html">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13.5M12 6.253A4.5 4.5 0 007.5 10.75H6a7.5 7.5 0 1012 0h-1.5A4.5 4.5 0 0012 6.253zM15 10.75h-6"></path></svg>
+                    饮食记录 <span style="font-size: 10px; margin-left: 4px;">Diet</span>
+                </a></li>
+                <li><a href="study.html">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13.5M12 6.253A4.5 4.5 0 007.5 10.75H6a7.5 7.5 0 1012 0h-1.5A4.5 4.5 0 0012 6.253zM15 10.75h-6"></path></svg>
+                    学习计划 <span style="font-size: 10px; margin-left: 4px;">Study</span>
+                </a></li>
+            </ul>
+        </nav>
+
+        <div class="user-profile">
+            <img src="https://via.placeholder.com/80" alt="User Avatar">
+            <div class="user-info">
+                <div class="name-zh">示例用户</div>
+                <div class="name-en">USER DEMO</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 2. 主内容 (Main Content) -->
+    <main class="main-content">
+        <header class="header">
+            <div class="title">
+                <h1 class="title-zh">日程管理中心</h1>
+                <p class="title-en">SCHEDULE MANAGEMENT</p>
+            </div>
+            <a href="#" class="btn-gradient">
+                <span style="font-size: 20px; margin-right: 8px;">+</span> 新增日程
+            </a>
+        </header>
+
+        <!-- 3. 日程页特定布局 -->
+        <div class="schedule-layout">
+
+            <!-- 卡片 1: 日历 (左侧) -->
+            <div class="bento-card calendar-card">
+                <div class="calendar-header">
+                    <div class="month-year">2025年 11月</div>
+                    <!-- 【新增】视图切换 -->
+                    <div class="view-toggles">
+                        <button class="active">周</button>
+                        <button>月</button>
+                        <button>列表</button>
+                    </div>
+                </div>
+                
+                <!-- 【新增】周视图容器 -->
+                <div class="week-view-container">
+                    <div class="week-view-grid">
+                        <!-- 头部 (星期) -->
+                        <div class="day-header" style="grid-column: 1;"></div>
+                        <div class="day-header" style="grid-column: 2;">
+                            <div class="day-name">MON</div>
+                            <div class="day-number">10</div>
+                        </div>
+                        <div class="day-header" style="grid-column: 3;">
+                            <div class="day-name">TUE</div>
+                            <div class="day-number">11</div>
+                        </div>
+                        <div class="day-header" style="grid-column: 4;">
+                            <div class="day-name">WED</div>
+                            <div class="day-number">12</div>
+                        </div>
+                        <div class="day-header today" style="grid-column: 5;">
+                            <div class="day-name">THU</div>
+                            <div class="day-number">13</div>
+                        </div>
+                        <div class="day-header" style="grid-column: 6;">
+                            <div class="day-name">FRI</div>
+                            <div class="day-number">14</div>
+                        </div>
+                        <div class="day-header" style="grid-column: 7;">
+                            <div class="day-name">SAT</div>
+                            <div class="day-number">15</div>
+                        </div>
+                        <div class="day-header" style="grid-column: 8;">
+                            <div class="day-name">SUN</div>
+                            <div class="day-number">16</div>
+                        </div>
+
+                        <!-- 时间轴 (侧栏) -->
+                        <!-- 8:00 (Row 2) -->
+                        <div class="time-slot" style="grid-row: 2;">08:00</div>
+                        <!-- 9:00 (Row 3) -->
+                        <div class="time-slot" style="grid-row: 3;">09:00</div>
+                        <!-- ... (以此类推) -->
+                        <div class="time-slot" style="grid-row: 4;">10:00</div>
+                        <div class="time-slot" style="grid-row: 5;">11:00</div>
+                        <div class="time-slot" style="grid-row: 6;">12:00</div>
+                        <div class="time-slot" style="grid-row: 7;">13:00</div>
+                        <div class="time-slot" style="grid-row: 8;">14:00</div>
+                        <div class="time-slot" style="grid-row: 9;">15:00</div>
+                        <div class="time-slot" style="grid-row: 10;">16:00</div>
+                        <div class="time-slot" style="grid-row: 11;">17:00</div>
+                        <div class="time-slot" style="grid-row: 12;">18:00</div>
+                        <div class="time-slot" style="grid-row: 13;">19:00</div>
+                        <div class="time-slot" style="grid-row: 14;">20:00</div>
+                        <div class="time-slot" style="grid-row: 15;">21:00</div>
+                        <div class="time-slot" style="grid-row: 16;">22:00</div>
+                        
+                        <!-- 网格背景线 -->
+                        <div class="day-column-bg" style="grid-column: 2;"></div>
+                        <div class="day-column-bg" style="grid-column: 3;"></div>
+                        <div class="day-column-bg" style="grid-column: 4;"></div>
+                        <div class="day-column-bg" style="grid-column: 5;"></div>
+                        <div class="day-column-bg" style="grid-column: 6;"></div>
+                        <div class="day-column-bg" style="grid-column: 7;"></div>
+                        <div class="day-column-bg" style="grid-column: 8;"></div>
+                        
+                        <!-- 【核心】日程事件块 -->
+                        
+                        <!-- 事件1: 周一 14:00 - 16:00 (2小时) -->
+                        <div class="event-block event-1">
+                            <div class="title-zh">项目管理会议</div>
+                            <div class="title-en">PROJECT MEETING</div>
+                        </div>
+                        
+                        <!-- 事件2: 周三 09:00 - 12:00 (3小时) -->
+                        <div class="event-block event-2">
+                             <div class="title-zh">健身房 - 胸部</div>
+                             <div class="title-en">GYM - CHEST DAY</div>
+                        </div>
+                        
+                        <!-- 事件3: 周四(今天) 15:00 - 16:00 (1小时) -->
+                        <div class="event-block event-3">
+                             <div class="title-zh">编译原理 DDL</div>
+                             <div class="title-en">COMPILER HW</div>
+                        </div>
+                        
+                         <!-- 事件4: 周四(今天) 19:00 - 21:00 (2小时) -->
+                        <div class="event-block event-4">
+                             <div class="title-zh">运筹学作业</div>
+                             <div class="title-en">OPERATIONS RESEARCH</div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- 卡片 2: 今日日程 (右上) -->
+            <div class="bento-card agenda-card">
+                <div class="card-header">
+                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <div class="title-wrapper">
+                        <div class="title-zh">今日日程 (11月13日)</div>
+                        <div class="title-en">TODAY'S AGENDA</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <ul class="schedule-list">
+                        <!-- 这里的列表现在对应左侧周视图的 "今天" -->
+                        <li class="schedule-item item-3">
+                            <span class="time">15:00</span>
+                            <span class="divider" style="background: var(--highlight-3);"></span>
+                            <span class="title">编译原理 DDL</span>
+                        </li>
+                        <li class="schedule-item item-2">
+                            <span class="time">19:00</span>
+                            <span class="divider" style="background: var(--highlight-2);"></span>
+                            <span class="title">运筹学作业</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- 卡片 3: AI 日程建议 (右下) -->
+            <div class="bento-card ai-suggestion-card">
+                 <div class="card-header">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 4.5a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5H7.5zM15 4.5a.75.75 0 000 1.5h1.5a.75.75 0 000-1.5H15zM4.125 7.125a.75.75 0 000 1.06l.94.94a.75.75 0 101.06-1.06l-.94-.94a.75.75 0 00-1.06 0zM17.815 7.185a.75.75 0 10-1.06 1.06l.94.94a.75.75 0 001.06-1.06l-.94-.94zM12 10.5a.75.75 0 01.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 01.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 01.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75v-.008a.75.75 0 01.75-.75h.008a.75.75 0 01.75-.75v-.008a.75.75 0 01.75-.75h.008a.75.75 0 01.75-.75v-.008a.75.75 0 01.75-.75h.008a.75.75 0 01.75-.75V11.25a.75.75 0 01-.75-.75zM10.125 18.375a.75.75 0 000 1.06l.94.94a.75.75 0 101.06-1.06l-.94-.94a.75.75 0 00-1.06 0zM21 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H20.25a.75.75 0 01.75.75zM3.75 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM7.185 17.815a.75.75 0 10-1.06-1.06l-.94.94a.75.75 0 001.06 1.06l.94-.94zM15 19.5a.75.75 0 000-1.5h-1.5a.75.75 0 000 1.5H15zM12 21.75a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0V21a.75.75 0 01-.75-.75z" /></svg>
+                    <div class="title-wrapper">
+                        <div class="title-zh">AI 日程建议</div>
+                        <div class="title-en">AI SUGGESTION</div>
+                    </div>
+                </div>
+                 <div class="card-content">
+                     <div class="insight-body">
+                        检测到您本周的 <strong>“学习”</strong> 时间下降了 <strong>30%</strong>，但 <strong>“运筹学作业”</strong> 已添加到日程中。
+                        <br/><br/>
+                        <strong>建议：</strong> 明天下午 (11月14日) 15:00-17:00 是您的空闲时段，适合安排专注学习。
+                     </div>
+                 </div>
+            </div>
+
+        </div>
+    </main>
+
+</body>
+</html>

@@ -11,8 +11,6 @@
     <packaging>pom</packaging>
 	<modules>
 		<module>services</module>
-		<module>services/user-service</module>
-		<module>services/notification-service</module>
 	</modules>
 	<groupId>org.example</groupId>
 	<artifactId>AILifeAssistantBackend</artifactId>

@@ -47,12 +47,7 @@
             <version>2022.0.0.0</version>
         </dependency>
 
-        <!-- Lombok 依赖 -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
+        <!-- 移除了 RabbitMQ 和 Lombok 依赖 -->
     </dependencies>
 
 </project>

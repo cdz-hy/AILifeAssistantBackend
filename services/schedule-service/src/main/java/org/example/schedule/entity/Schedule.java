@@ -32,7 +32,7 @@ public class Schedule {
     private List<ScheduleTag> tags;
     private List<ScheduleReminder> reminders;
     private List<ScheduleAISuggestion> aiSuggestions;
-    private List<ScheduleException> exceptions;
+    
 
     // Constructors
     public Schedule() {}
@@ -220,11 +220,5 @@ public class Schedule {
         this.aiSuggestions = aiSuggestions;
     }
     
-    public List<ScheduleException> getExceptions() {
-        return exceptions;
-    }
     
-    public void setExceptions(List<ScheduleException> exceptions) {
-        this.exceptions = exceptions;
-    }
 }

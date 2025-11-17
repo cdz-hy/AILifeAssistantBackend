@@ -6,7 +6,6 @@ import org.example.schedule.entity.ScheduleTag;
 import org.example.schedule.entity.ScheduleReminder;
 import org.example.schedule.entity.ScheduleAISuggestion;
 import org.example.schedule.entity.WeatherCache;
-import org.example.schedule.entity.ScheduleException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -288,47 +287,6 @@ public interface ScheduleService {
      * 清理过期的天气缓存
      */
     void cleanExpiredWeatherCache();
-    
-    // Schedule Exception operations
-    /**
-     * 根据ID获取日程例外
-     * @param id 例外ID
-     * @return 日程例外实体
-     */
-    ScheduleException getScheduleExceptionById(Long id);
-    
-    /**
-     * 根据日程ID获取例外
-     * @param scheduleId 日程ID
-     * @return 日程例外列表
-     */
-    List<ScheduleException> getScheduleExceptionsByScheduleId(Long scheduleId);
-    
-    /**
-     * 创建日程例外
-     * @param scheduleException 日程例外实体
-     * @return 创建后的日程例外实体
-     */
-    ScheduleException createScheduleException(ScheduleException scheduleException);
-    
-    /**
-     * 更新日程例外
-     * @param scheduleException 日程例外实体
-     * @return 更新后的日程例外实体
-     */
-    ScheduleException updateScheduleException(ScheduleException scheduleException);
-    
-    /**
-     * 删除日程例外
-     * @param id 例外ID
-     */
-    void deleteScheduleException(Long id);
-    
-    /**
-     * 根据日程ID删除例外
-     * @param scheduleId 日程ID
-     */
-    void deleteScheduleExceptionsByScheduleId(Long scheduleId);
     
     // Event publishing methods
     /**

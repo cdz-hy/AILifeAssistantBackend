@@ -38,8 +38,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Autowired
     private WeatherCacheMapper weatherCacheMapper;
     
-    @Autowired
-    private ScheduleExceptionMapper scheduleExceptionMapper;
+    
     
     // Schedule operations
     @Override
@@ -51,7 +50,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             schedule.setTags(scheduleTagMapMapper.selectTagsByScheduleId(id));
             schedule.setReminders(scheduleReminderMapper.selectByScheduleId(id));
             schedule.setAiSuggestions(scheduleAISuggestionMapper.selectByScheduleId(id));
-            schedule.setExceptions(scheduleExceptionMapper.selectByScheduleId(id));
+            
         }
         return schedule;
     }
@@ -97,7 +96,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         // Delete related data
         deleteRemindersByScheduleId(id);
         deleteAISuggestionsByScheduleId(id);
-        deleteScheduleExceptionsByScheduleId(id);
+        
         scheduleTagMapMapper.deleteByScheduleId(id);
         
         // Delete schedule
@@ -313,43 +312,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     @Override
     public void cleanExpiredWeatherCache() {
         weatherCacheMapper.deleteExpired(LocalDateTime.now());
-    }
-    
-    // Schedule Exception operations
-    @Override
-    public ScheduleException getScheduleExceptionById(Long id) {
-        return scheduleExceptionMapper.selectById(id);
-    }
-    
-    @Override
-    public List<ScheduleException> getScheduleExceptionsByScheduleId(Long scheduleId) {
-        return scheduleExceptionMapper.selectByScheduleId(scheduleId);
-    }
-    
-    @Transactional
-    @Override
-    public ScheduleException createScheduleException(ScheduleException scheduleException) {
-        scheduleExceptionMapper.insert(scheduleException);
-        return scheduleException;
-    }
-    
-    @Transactional
-    @Override
-    public ScheduleException updateScheduleException(ScheduleException scheduleException) {
-        scheduleExceptionMapper.update(scheduleException);
-        return scheduleException;
-    }
-    
-    @Transactional
-    @Override
-    public void deleteScheduleException(Long id) {
-        scheduleExceptionMapper.deleteById(id);
-    }
-    
-    @Transactional
-    @Override
-    public void deleteScheduleExceptionsByScheduleId(Long scheduleId) {
-        scheduleExceptionMapper.deleteByScheduleId(scheduleId);
     }
     
     // Event publishing methods

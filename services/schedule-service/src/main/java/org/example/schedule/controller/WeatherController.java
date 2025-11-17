@@ -2,6 +2,7 @@ package org.example.schedule.controller;
 
 import org.example.schedule.entity.WeatherCache;
 import org.example.schedule.service.ScheduleService;
+import org.example.schedule.service.WeatherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +12,19 @@ public class WeatherController {
     
     @Autowired
     private ScheduleService scheduleService;
+    
+    @Autowired
+    private WeatherService weatherService;
+    
+    /**
+     * 根据城市编码获取天气信息
+     * @param cityCode 城市编码
+     * @return 天气缓存实体
+     */
+    @GetMapping("/city/{cityCode}")
+    public WeatherCache getWeatherByCityCode(@PathVariable String cityCode) {
+        return weatherService.getWeatherByCityCode(cityCode);
+    }
     
     @GetMapping("/cache/{cacheKey}")
     public WeatherCache getWeatherCache(@PathVariable String cacheKey) {

@@ -36,6 +36,23 @@
         ORDER BY start_time
     </select>
     
+    <select id="selectNonRecurringByUserIdAndDateRange" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule
+        WHERE user_id = #{userId}
+        AND recurrence_rule IS NULL
+        AND start_time >= #{startTime}
+        AND end_time <![CDATA[ <= ]]> #{endTime}
+        ORDER BY start_time
+    </select>
+    
+    <select id="selectRecurringStartedBefore" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule
+        WHERE user_id = #{userId}
+        AND recurrence_rule IS NOT NULL
+        AND start_time <![CDATA[ <= ]]> #{endTime}
+        ORDER BY start_time
+    </select>
+    
     <select id="selectByTypeId" parameterType="long" resultMap="ScheduleResultMap">
         SELECT * FROM t_schedule WHERE type_id = #{typeId}
     </select>

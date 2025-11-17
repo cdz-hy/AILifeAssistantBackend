@@ -40,6 +40,26 @@ public interface ScheduleMapper {
                                               @Param("endTime") LocalDateTime endTime);
     
     /**
+     * 根据用户ID和日期范围查询非重复日程
+     * @param userId 用户ID
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 日程列表
+     */
+    List<Schedule> selectNonRecurringByUserIdAndDateRange(@Param("userId") Long userId,
+                                                          @Param("startTime") LocalDateTime startTime,
+                                                          @Param("endTime") LocalDateTime endTime);
+    
+    /**
+     * 根据用户ID查询在指定时间之前开始的重复日程
+     * @param userId 用户ID
+     * @param endTime 结束时间
+     * @return 日程列表
+     */
+    List<Schedule> selectRecurringStartedBefore(@Param("userId") Long userId,
+                                                @Param("endTime") LocalDateTime endTime);
+    
+    /**
      * 插入新的日程
      * @param schedule 日程实体
      * @return 影响的行数

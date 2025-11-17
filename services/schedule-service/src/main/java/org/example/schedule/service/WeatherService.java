@@ -4,39 +4,27 @@ import org.example.schedule.entity.WeatherCache;
 
 /**
  * 天气服务接口
- * 负责天气相关业务逻辑
+ * 提供天气查询相关业务逻辑
  */
 public interface WeatherService {
     
     /**
-     * 根据缓存键获取天气缓存
-     * @param cacheKey 缓存键
+     * 根据城市编码获取天气信息
+     * @param cityCode 城市编码
      * @return 天气缓存实体
      */
-    WeatherCache getWeatherCache(String cacheKey);
+    WeatherCache getWeatherByCityCode(String cityCode);
     
     /**
-     * 根据缓存键获取有效的天气缓存
-     * @param cacheKey 缓存键
-     * @return 天气缓存实体
+     * 调用高德地图API获取天气信息
+     * @param cityCode 城市编码
+     * @return 天气数据JSON字符串
      */
-    WeatherCache getValidWeatherCache(String cacheKey);
+    String fetchWeatherFromAmap(String cityCode);
     
     /**
-     * 保存天气缓存
-     * @param weatherCache 天气缓存实体
-     * @return 保存后的天气缓存实体
+     * 从Nacos配置中心获取高德地图API Key
+     * @return API Key
      */
-    WeatherCache saveWeatherCache(WeatherCache weatherCache);
-    
-    /**
-     * 删除天气缓存
-     * @param cacheKey 缓存键
-     */
-    void deleteWeatherCache(String cacheKey);
-    
-    /**
-     * 清理过期的天气缓存
-     */
-    void cleanExpiredWeatherCache();
+    String getAmapApiKey();
 }

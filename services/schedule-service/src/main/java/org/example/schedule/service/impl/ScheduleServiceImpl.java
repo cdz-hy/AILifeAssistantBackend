@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.time.Duration;
 
@@ -133,9 +135,10 @@ public class ScheduleServiceImpl implements ScheduleService {
         instance.setTypeId(original.getTypeId());
         instance.setUrgent(original.getUrgent());
         instance.setImportant(original.getImportant());
-        // 实例保留原始的重复规则，但不使用RecurrencePattern对象
+        // 实例保留原始的重复规则
         instance.setRecurrenceRule(original.getRecurrenceRule());
-        instance.setRecurrencePattern(null);
+        // 同时保留RecurrencePattern对象，以便前端可以使用
+        instance.setRecurrencePattern(original.getRecurrencePattern());
         instance.setStatus(original.getStatus());
         instance.setCreatedAt(original.getCreatedAt());
         instance.setUpdatedAt(original.getUpdatedAt());
@@ -159,17 +162,75 @@ public class ScheduleServiceImpl implements ScheduleService {
         // 这里使用简化的方法计算下一次发生的时间
         // 实际项目中可以使用iCal4j等库来处理复杂的RRULE
         
-        if (recurrenceRule.contains("FREQ=DAILY")) {
-            int interval = getInterval(recurrenceRule, 1);
+        // 处理带RRULE:前缀的规则
+        String cleanRule = recurrenceRule;
+        if (recurrenceRule.startsWith("RRULE:")) {
+            cleanRule = recurrenceRule.substring(6); // 移除"RRULE:"前缀
+        }
+        
+        if (cleanRule.contains("FREQ=DAILY")) {
+            int interval = getInterval(cleanRule, 1);
             return current.plusDays(interval);
-        } else if (recurrenceRule.contains("FREQ=WEEKLY")) {
-            int interval = getInterval(recurrenceRule, 1);
+        } else if (cleanRule.contains("FREQ=WEEKLY")) {
+            int interval = getInterval(cleanRule, 1);
+            
+            // 检查是否有BYDAY参数
+            if (cleanRule.contains("BYDAY=")) {
+                // 解析BYDAY参数
+                DayOfWeek targetDay = getDayOfWeekFromRule(cleanRule);
+                if (targetDay != null) {
+                    // 计算到目标星期几的天数差
+                    int daysUntilTarget = (targetDay.getValue() - current.getDayOfWeek().getValue() + 7) % 7;
+                    if (daysUntilTarget == 0 && interval > 1) {
+                        // 如果是同一天且间隔大于1，则增加间隔周数
+                        return current.plusWeeks(interval);
+                    } else if (daysUntilTarget == 0) {
+                        // 如果是同一天且间隔为1，则增加一周
+                        return current.plusWeeks(1);
+                    } else {
+                        // 返回到目标星期几的日期
+                        return current.plusDays(daysUntilTarget);
+                    }
+                }
+            }
+            
+            // 默认处理方式
             return current.plusWeeks(interval);
-        } else if (recurrenceRule.contains("FREQ=MONTHLY")) {
-            int interval = getInterval(recurrenceRule, 1);
+        } else if (cleanRule.contains("FREQ=MONTHLY")) {
+            int interval = getInterval(cleanRule, 1);
+            
+            // 检查是否有BYMONTHDAY参数
+            if (cleanRule.contains("BYMONTHDAY=")) {
+                // 解析BYMONTHDAY参数
+                List<Integer> daysOfMonth = getDaysOfMonthFromRule(cleanRule);
+                if (!daysOfMonth.isEmpty()) {
+                    // 查找下一个应该重复的日期
+                    LocalDateTime nextDate = findNextMonthlyOccurrence(current, daysOfMonth, interval);
+                    if (nextDate != null) {
+                        return nextDate;
+                    }
+                }
+            }
+            
+            // 默认处理方式
             return current.plusMonths(interval);
-        } else if (recurrenceRule.contains("FREQ=YEARLY")) {
-            int interval = getInterval(recurrenceRule, 1);
+        } else if (cleanRule.contains("FREQ=YEARLY")) {
+            int interval = getInterval(cleanRule, 1);
+            
+            // 检查是否有BYMONTH参数
+            if (cleanRule.contains("BYMONTH=")) {
+                // 解析BYMONTH参数
+                List<Integer> monthsOfYear = getMonthsOfYearFromRule(cleanRule);
+                if (!monthsOfYear.isEmpty()) {
+                    // 查找下一个应该重复的月份
+                    LocalDateTime nextDate = findNextYearlyOccurrence(current, monthsOfYear, interval);
+                    if (nextDate != null) {
+                        return nextDate;
+                    }
+                }
+            }
+            
+            // 默认处理方式
             return current.plusYears(interval);
         }
         
@@ -197,6 +258,215 @@ public class ScheduleServiceImpl implements ScheduleService {
             }
         }
         return defaultInterval;
+    }
+    
+    /**
+     * 从重复规则中提取星期几
+     * @param recurrenceRule 重复规则
+     * @return 星期几
+     */
+    private DayOfWeek getDayOfWeekFromRule(String recurrenceRule) {
+        if (recurrenceRule.contains("BYDAY=")) {
+            int startIndex = recurrenceRule.indexOf("BYDAY=") + 6;
+            int endIndex = recurrenceRule.indexOf(";", startIndex);
+            if (endIndex == -1) {
+                endIndex = recurrenceRule.length();
+            }
+            String dayStr = recurrenceRule.substring(startIndex, endIndex);
+            
+            switch (dayStr) {
+                case "MO": return DayOfWeek.MONDAY;
+                case "TU": return DayOfWeek.TUESDAY;
+                case "WE": return DayOfWeek.WEDNESDAY;
+                case "TH": return DayOfWeek.THURSDAY;
+                case "FR": return DayOfWeek.FRIDAY;
+                case "SA": return DayOfWeek.SATURDAY;
+                case "SU": return DayOfWeek.SUNDAY;
+                default: return null;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 从重复规则中提取月中日期
+     * @param recurrenceRule 重复规则
+     * @return 月中日期列表
+     */
+    private List<Integer> getDaysOfMonthFromRule(String recurrenceRule) {
+        List<Integer> days = new ArrayList<>();
+        if (recurrenceRule.contains("BYMONTHDAY=")) {
+            int startIndex = recurrenceRule.indexOf("BYMONTHDAY=") + 11;
+            int endIndex = recurrenceRule.indexOf(";", startIndex);
+            if (endIndex == -1) {
+                endIndex = recurrenceRule.length();
+            }
+            String daysStr = recurrenceRule.substring(startIndex, endIndex);
+            String[] dayArray = daysStr.split(",");
+            
+            for (String dayStr : dayArray) {
+                try {
+                    int day = Integer.parseInt(dayStr);
+                    // 确保日期在有效范围内
+                    if (day >= 1 && day <= 31) {
+                        days.add(day);
+                    }
+                } catch (NumberFormatException e) {
+                    // 忽略无效的数字
+                }
+            }
+        }
+        return days;
+    }
+    
+    /**
+     * 查找下一个月度重复日期
+     * @param current 当前日期
+     * @param daysOfMonth 月中日期列表
+     * @param interval 间隔月数
+     * @return 下一个重复日期
+     */
+    private LocalDateTime findNextMonthlyOccurrence(LocalDateTime current, List<Integer> daysOfMonth, int interval) {
+        // 对日期进行排序
+        List<Integer> sortedDays = new ArrayList<>(daysOfMonth);
+        Collections.sort(sortedDays);
+        
+        // 查找当前月内下一个可能的日期
+        for (Integer day : sortedDays) {
+            if (day >= current.getDayOfMonth()) {
+                // 检查日期是否有效（例如，不是2月30日）
+                if (isValidDayInMonth(current.getYear(), current.getMonthValue(), day)) {
+                    LocalDateTime candidate = current.withDayOfMonth(day);
+                    if (candidate.isAfter(current)) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+        
+        // 如果当前月内没有合适的日期，则转到下一月
+        LocalDateTime nextMonth = current.plusMonths(interval);
+        // 在下一月中查找最早的日期
+        for (Integer day : sortedDays) {
+            if (isValidDayInMonth(nextMonth.getYear(), nextMonth.getMonthValue(), day)) {
+                return nextMonth.withDayOfMonth(day);
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * 检查指定年月的日期是否有效
+     * @param year 年
+     * @param month 月
+     * @param day 日
+     * @return 日期是否有效
+     */
+    private boolean isValidDayInMonth(int year, int month, int day) {
+        if (day < 1 || day > 31) return false;
+        
+        // 每月的天数
+        int[] daysInMonth = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+        
+        // 闰年2月有29天
+        if (month == 2 && isLeapYear(year)) {
+            return day <= 29;
+        }
+        
+        // 检查是否超过该月的最大天数
+        if (month >= 1 && month <= 12) {
+            return day <= daysInMonth[month - 1];
+        }
+        
+        return false;
+    }
+    
+    /**
+     * 判断是否为闰年
+     * @param year 年
+     * @return 是否为闰年
+     */
+    private boolean isLeapYear(int year) {
+        return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+    }
+    
+    /**
+     * 从重复规则中提取年中月份
+     * @param recurrenceRule 重复规则
+     * @return 年中月份列表
+     */
+    private List<Integer> getMonthsOfYearFromRule(String recurrenceRule) {
+        List<Integer> months = new ArrayList<>();
+        if (recurrenceRule.contains("BYMONTH=")) {
+            int startIndex = recurrenceRule.indexOf("BYMONTH=") + 8;
+            int endIndex = recurrenceRule.indexOf(";", startIndex);
+            if (endIndex == -1) {
+                endIndex = recurrenceRule.length();
+            }
+            String monthsStr = recurrenceRule.substring(startIndex, endIndex);
+            String[] monthArray = monthsStr.split(",");
+            
+            for (String monthStr : monthArray) {
+                try {
+                    int month = Integer.parseInt(monthStr);
+                    // 确保月份在有效范围内
+                    if (month >= 1 && month <= 12) {
+                        months.add(month);
+                    }
+                } catch (NumberFormatException e) {
+                    // 忽略无效的数字
+                }
+            }
+        }
+        return months;
+    }
+    
+    /**
+     * 查找下一个年度重复日期
+     * @param current 当前日期
+     * @param monthsOfYear 年中月份列表
+     * @param interval 间隔年数
+     * @return 下一个重复日期
+     */
+    private LocalDateTime findNextYearlyOccurrence(LocalDateTime current, List<Integer> monthsOfYear, int interval) {
+        // 对月份进行排序
+        List<Integer> sortedMonths = new ArrayList<>(monthsOfYear);
+        Collections.sort(sortedMonths);
+        
+        // 获取当前日期的日期部分（几号）
+        int targetDay = current.getDayOfMonth();
+        
+        // 查找当前年内下一个可能的月份
+        for (Integer month : sortedMonths) {
+            if (month >= current.getMonthValue()) {
+                // 尝试在目标月份设置相同的日期
+                if (isValidDayInMonth(current.getYear(), month, targetDay)) {
+                    LocalDateTime candidate = current.withMonth(month).withDayOfMonth(targetDay);
+                    if (candidate.isAfter(current)) {
+                        return candidate;
+                    }
+                }
+                // 如果当前月且日期不匹配，检查下一个月份
+                else if (month > current.getMonthValue()) {
+                    // 尝试在目标月份设置相同的日期
+                    if (isValidDayInMonth(current.getYear(), month, targetDay)) {
+                        return current.withMonth(month).withDayOfMonth(targetDay);
+                    }
+                }
+            }
+        }
+        
+        // 如果当前年内没有合适的月份，则转到下一年
+        LocalDateTime nextYear = current.plusYears(interval);
+        // 在下一年中查找最早的月份
+        for (Integer month : sortedMonths) {
+            if (isValidDayInMonth(nextYear.getYear(), month, targetDay)) {
+                return nextYear.withMonth(month).withDayOfMonth(targetDay);
+            }
+        }
+        
+        return null;
     }
     
     @Override

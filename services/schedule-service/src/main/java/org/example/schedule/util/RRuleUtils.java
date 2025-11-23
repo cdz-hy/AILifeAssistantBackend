@@ -55,7 +55,12 @@ public class RRuleUtils {
                 if (pattern.getInterval() != null && pattern.getInterval() > 1) {
                     rrule.append(";INTERVAL=").append(pattern.getInterval());
                 }
-                if (pattern.getDayOfMonth() != null) {
+                if (pattern.getDaysOfMonth() != null && !pattern.getDaysOfMonth().isEmpty()) {
+                    rrule.append(";BYMONTHDAY=");
+                    rrule.append(pattern.getDaysOfMonth().stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(",")));
+                } else if (pattern.getDayOfMonth() != null) {
                     rrule.append(";BYMONTHDAY=").append(pattern.getDayOfMonth());
                 }
                 break;
@@ -71,7 +76,12 @@ public class RRuleUtils {
                             .map(String::valueOf)
                             .collect(Collectors.joining(",")));
                 }
-                if (pattern.getDayOfMonth() != null) {
+                if (pattern.getDaysOfMonth() != null && !pattern.getDaysOfMonth().isEmpty()) {
+                    rrule.append(";BYMONTHDAY=");
+                    rrule.append(pattern.getDaysOfMonth().stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(",")));
+                } else if (pattern.getDayOfMonth() != null) {
                     rrule.append(";BYMONTHDAY=").append(pattern.getDayOfMonth());
                 }
                 break;
@@ -108,7 +118,12 @@ public class RRuleUtils {
                             .collect(Collectors.joining(",")));
                 }
                 
-                if (pattern.getDayOfMonth() != null) {
+                if (pattern.getDaysOfMonth() != null && !pattern.getDaysOfMonth().isEmpty()) {
+                    rrule.append(";BYMONTHDAY=");
+                    rrule.append(pattern.getDaysOfMonth().stream()
+                            .map(String::valueOf)
+                            .collect(Collectors.joining(",")));
+                } else if (pattern.getDayOfMonth() != null) {
                     rrule.append(";BYMONTHDAY=").append(pattern.getDayOfMonth());
                 }
                 break;
@@ -199,10 +214,26 @@ public class RRuleUtils {
                     break;
                     
                 case "BYMONTHDAY":
-                    try {
-                        pattern.setDayOfMonth(Integer.parseInt(value));
-                    } catch (NumberFormatException e) {
-                        // 忽略无效的数字
+                    // 解析多个日期
+                    days = value.split(",");
+                    List<Integer> daysList = new ArrayList<>();
+                    for (String dayStr : days) {
+                        try {
+                            int day = Integer.parseInt(dayStr);
+                            // 确保日期在有效范围内
+                            if (day >= 1 && day <= 31) {
+                                daysList.add(day);
+                            }
+                        } catch (NumberFormatException e) {
+                            // 忽略无效的数字
+                        }
+                    }
+                    
+                    if (!daysList.isEmpty()) {
+                        // 设置日期列表
+                        pattern.setDaysOfMonth(daysList);
+                        // 仍然设置单个日期字段（为了向后兼容）
+                        pattern.setDayOfMonth(daysList.get(0));
                     }
                     break;
             }

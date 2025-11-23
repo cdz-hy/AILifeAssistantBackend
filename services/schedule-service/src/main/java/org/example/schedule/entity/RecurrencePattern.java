@@ -47,6 +47,11 @@ public class RecurrencePattern {
     private Integer dayOfMonth;
     
     /**
+     * 具体日期列表（用于每月/每年重复多个日期）
+     */
+    private List<Integer> daysOfMonth;
+    
+    /**
      * 构造函数
      */
     public RecurrencePattern() {}
@@ -95,5 +100,13 @@ public class RecurrencePattern {
     
     public void setDayOfMonth(Integer dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
+    }
+    
+    public List<Integer> getDaysOfMonth() {
+        return daysOfMonth;
+    }
+    
+    public void setDaysOfMonth(List<Integer> daysOfMonth) {
+        this.daysOfMonth = daysOfMonth;
     }
 }

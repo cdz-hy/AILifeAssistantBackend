@@ -32,7 +32,6 @@ public class Schedule {
     private List<ScheduleTag> tags;
     private List<ScheduleReminder> reminders;
     private List<ScheduleAISuggestion> aiSuggestions;
-    private List<ScheduleException> exceptions;
 
     // Constructors
     public Schedule() {}
@@ -129,11 +128,15 @@ public class Schedule {
     }
 
     public String getRecurrenceRule() {
-        // 如果有RecurrencePattern，则从它生成RRULE字符串
+        // 优先返回原始的recurrenceRule字段值
+        if (recurrenceRule != null) {
+            return recurrenceRule;
+        }
+        // 如果recurrenceRule为空但有RecurrencePattern，则从它生成RRULE字符串
         if (recurrencePattern != null) {
             return RRuleUtils.toRRule(recurrencePattern);
         }
-        return recurrenceRule;
+        return null;
     }
 
     public void setRecurrenceRule(String recurrenceRule) {
@@ -219,12 +222,5 @@ public class Schedule {
     public void setAiSuggestions(List<ScheduleAISuggestion> aiSuggestions) {
         this.aiSuggestions = aiSuggestions;
     }
-    
-    public List<ScheduleException> getExceptions() {
-        return exceptions;
-    }
-    
-    public void setExceptions(List<ScheduleException> exceptions) {
-        this.exceptions = exceptions;
-    }
+
 }

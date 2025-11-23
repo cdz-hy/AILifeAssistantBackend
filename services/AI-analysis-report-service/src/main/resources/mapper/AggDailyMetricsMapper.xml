@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.aianalysis.mapper.AggDailyMetricsMapper">
+    
+    <resultMap id="AggDailyMetricsResultMap" type="org.example.aianalysis.entity.AggDailyMetrics">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="date" column="date"/>
+        <result property="totalCalories" column="total_calories"/>
+        <result property="totalFocusMinutes" column="total_focus_minutes"/>
+        <result property="totalExpense" column="total_expense"/>
+    </resultMap>
+    
+</mapper>

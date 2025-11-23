@@ -1,13 +1,14 @@
 package org.example.schedule.service;
 
 import org.example.schedule.entity.Schedule;
+import org.example.schedule.entity.ScheduleType;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * 日程管理服务接口
- * 定义日程管理相关业务逻辑
+ * 负责日程核心业务逻辑
  */
 public interface ScheduleManagementService {
     

@@ -27,7 +27,7 @@ public class ScheduleDTO {
     private List<String> tags;
     private List<ScheduleReminderDTO> reminders;
     private List<ScheduleAISuggestionDTO> aiSuggestions;
-    
+    private List<ScheduleExceptionDTO> exceptions;
     
     // Constructors
     public ScheduleDTO() {}
@@ -189,5 +189,11 @@ public class ScheduleDTO {
         this.aiSuggestions = aiSuggestions;
     }
     
+    public List<ScheduleExceptionDTO> getExceptions() {
+        return exceptions;
+    }
     
+    public void setExceptions(List<ScheduleExceptionDTO> exceptions) {
+        this.exceptions = exceptions;
+    }
 }

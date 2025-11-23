@@ -4,6 +4,7 @@ import org.example.schedule.entity.*;
 import org.example.schedule.mapper.*;
 import org.example.schedule.service.WeatherService;
 import org.example.schedule.service.ScheduleService;
+import org.example.schedule.service.impl.ScheduleLifecycleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,9 @@ public class ScheduleServiceImpl implements ScheduleService {
     
     @Autowired
     private WeatherService weatherService;
+    
+    @Autowired
+    private ScheduleLifecycleService scheduleLifecycleService;
     
     
     
@@ -261,6 +265,9 @@ public class ScheduleServiceImpl implements ScheduleService {
         // Publish event
         publishScheduleEvent(schedule, "CREATED");
         
+        // 创建日程生命周期任务
+        scheduleLifecycleService.createOrUpdateScheduleLifecycle(schedule);
+        
         return schedule;
     }
     
@@ -272,6 +279,9 @@ public class ScheduleServiceImpl implements ScheduleService {
         
         // Publish event
         publishScheduleEvent(schedule, "UPDATED");
+        
+        // 更新日程生命周期任务
+        scheduleLifecycleService.createOrUpdateScheduleLifecycle(schedule);
         
         return schedule;
     }

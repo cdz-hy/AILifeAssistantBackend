@@ -30,40 +30,124 @@ public class AIAnalysisScheduler {
     private final List<Long> userIds = Arrays.asList(1L, 2L, 3L);
     
     /**
-     * 每2小时执行一次数据收集和分析任务
+     * 每2小时执行一次日综合分析任务
      * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
      */
     @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // 每2小时执行一次
-    public void schedulePeriodicAnalysis() {
+    public void scheduleDailyComprehensiveAnalysis() {
         LocalDateTime now = LocalDateTime.now();
         // 只在用户活跃时间段执行
         if (now.getHour() >= 8 && now.getHour() <= 22) {
             LocalDate today = LocalDate.now();
-            System.out.println("开始调度每日数据分析任务，时间：" + now);
+            System.out.println("开始调度每日综合分析任务，时间：" + now);
             
             for (Long userId : userIds) {
-                // 调度每日数据分析任务
-                jobScheduler.schedule(() -> aiAnalysisJobHandler.executeDailyAnalysis(userId, today));
+                // 调度每日综合分析任务
+                jobScheduler.enqueue(() -> aiAnalysisJobHandler.executeDailyComprehensiveAnalysis(userId, today));
             }
             
-            System.out.println("每日数据分析任务调度完成");
+            System.out.println("每日综合分析任务调度完成");
         }
     }
     
     /**
-     * 每天凌晨2点执行周报生成任务
+     * 每2小时执行一次日日程分析任务
+     * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
      */
-    @Scheduled(cron = "0 0 2 * * MON") // 每周一凌晨2点
-    public void scheduleWeeklyAnalysis() {
+    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // 每2小时执行一次
+    public void scheduleDailyScheduleAnalysis() {
+        LocalDateTime now = LocalDateTime.now();
+        // 只在用户活跃时间段执行
+        if (now.getHour() >= 8 && now.getHour() <= 22) {
+            LocalDate today = LocalDate.now();
+            System.out.println("开始调度每日日程分析任务，时间：" + now);
+            
+            for (Long userId : userIds) {
+                // 调度每日日程分析任务
+                jobScheduler.enqueue(() -> aiAnalysisJobHandler.executeDailyScheduleAnalysis(userId, today));
+            }
+            
+            System.out.println("每日日程分析任务调度完成");
+        }
+    }
+    
+    /**
+     * 每2小时执行一次日财务分析任务
+     * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
+     */
+    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // 每2小时执行一次
+    public void scheduleDailyFinanceAnalysis() {
+        LocalDateTime now = LocalDateTime.now();
+        // 只在用户活跃时间段执行
+        if (now.getHour() >= 8 && now.getHour() <= 22) {
+            LocalDate today = LocalDate.now();
+            System.out.println("开始调度每日财务分析任务，时间：" + now);
+            
+            for (Long userId : userIds) {
+                // 调度每日财务分析任务
+                jobScheduler.enqueue(() -> aiAnalysisJobHandler.executeDailyFinanceAnalysis(userId, today));
+            }
+            
+            System.out.println("每日财务分析任务调度完成");
+        }
+    }
+    
+    /**
+     * 每2小时执行一次日学习分析任务
+     * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
+     */
+    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // 每2小时执行一次
+    public void scheduleDailyStudyAnalysis() {
+        LocalDateTime now = LocalDateTime.now();
+        // 只在用户活跃时间段执行
+        if (now.getHour() >= 8 && now.getHour() <= 22) {
+            LocalDate today = LocalDate.now();
+            System.out.println("开始调度每日学习分析任务，时间：" + now);
+            
+            for (Long userId : userIds) {
+                // 调度每日学习分析任务
+                jobScheduler.enqueue(() -> aiAnalysisJobHandler.executeDailyStudyAnalysis(userId, today));
+            }
+            
+            System.out.println("每日学习分析任务调度完成");
+        }
+    }
+    
+    /**
+     * 每2小时执行一次日饮食分析任务
+     * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
+     */
+    @Scheduled(fixedRate = 2 * 60 * 60 * 1000) // 每2小时执行一次
+    public void scheduleDailyDietAnalysis() {
+        LocalDateTime now = LocalDateTime.now();
+        // 只在用户活跃时间段执行
+        if (now.getHour() >= 8 && now.getHour() <= 22) {
+            LocalDate today = LocalDate.now();
+            System.out.println("开始调度每日饮食分析任务，时间：" + now);
+            
+            for (Long userId : userIds) {
+                // 调度每日饮食分析任务
+                jobScheduler.enqueue(() -> aiAnalysisJobHandler.executeDailyDietAnalysis(userId, today));
+            }
+            
+            System.out.println("每日饮食分析任务调度完成");
+        }
+    }
+    
+    /**
+     * 每周一8点执行周综合分析任务
+     */
+    @Scheduled(cron = "0 0 8 * * MON") // 每周一8点
+    public void scheduleWeeklyComprehensiveAnalysis() {
         LocalDate today = LocalDate.now();
-        System.out.println("开始调度每周数据分析任务，日期：" + today);
+        System.out.println("开始调度每周综合分析任务，日期：" + today);
         
         for (Long userId : userIds) {
-            // 调度每周数据分析任务
-            jobScheduler.schedule(() -> aiAnalysisJobHandler.executeWeeklyAnalysis(userId, today));
+            // 调度每周综合分析任务
+            jobScheduler.enqueue(() -> aiAnalysisJobHandler.executeWeeklyComprehensiveAnalysis(userId, today));
         }
         
-        System.out.println("每周数据分析任务调度完成");
+        System.out.println("每周综合分析任务调度完成");
     }
     
     /**
@@ -76,7 +160,7 @@ public class AIAnalysisScheduler {
         
         for (Long userId : userIds) {
             // 调度每月数据分析任务
-            jobScheduler.schedule(() -> aiAnalysisJobHandler.executeMonthlyAnalysis(userId, today));
+            jobScheduler.enqueue(() -> aiAnalysisJobHandler.executeMonthlyAnalysis(userId, today));
         }
         
         System.out.println("每月数据分析任务调度完成");

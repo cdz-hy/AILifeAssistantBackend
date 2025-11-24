@@ -1,42 +1,23 @@
 package org.example.aianalysis.config;
 
-import org.jobrunr.configuration.JobRunr;
-import org.jobrunr.configuration.JobRunrConfiguration;
-import org.jobrunr.configuration.JobRunrConfiguration.Builder;
-import org.jobrunr.storage.InMemoryStorageProvider;
 import org.jobrunr.storage.StorageProvider;
+import org.jobrunr.storage.InMemoryStorageProvider;
+import org.jobrunr.jobs.mappers.JobMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 /**
  * JobRunr配置类
- */
+ * 使用 jobrunr-spring-boot-3-starter 时，只需提供 StorageProvider Bean，
+ * Starter 会自动配置 JobRunr、JobScheduler 和 BackgroundJobServer。
+ **/
 @Configuration
 public class JobRunrConfig {
     
-    private JobRunrConfiguration jobRunrConfiguration;
-    
     @Bean
-    public StorageProvider storageProvider() {
-        return new InMemoryStorageProvider();
-    }
-    
-    @PostConstruct
-    public void initJobRunr() {
-        jobRunrConfiguration = JobRunr.configure()
-                .useStorageProvider(storageProvider())
-                .useJsonMapper()
-                .useJobActivator(applicationContext -> applicationContext)
-                .initialize();
-    }
-    
-    @PreDestroy
-    public void stopJobRunr() {
-        if (jobRunrConfiguration != null) {
-            jobRunrConfiguration.close();
-        }
+    public StorageProvider storageProvider(JobMapper jobMapper) {
+        InMemoryStorageProvider storageProvider = new InMemoryStorageProvider();
+        storageProvider.setJobMapper(jobMapper);
+        return storageProvider;
     }
 }

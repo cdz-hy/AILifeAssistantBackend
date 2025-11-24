@@ -36,6 +36,38 @@ public interface AIAnalysisService {
     GeneratedReport getMonthlyReportByDate(Long userId, LocalDate date);
     
     /**
+     * 根据用户ID和日期获取最新的日程分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 分析报告
+     */
+    GeneratedReport getDailyScheduleAnalysisReportByDate(Long userId, LocalDate date);
+    
+    /**
+     * 根据用户ID和日期获取最新的学习分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 分析报告
+     */
+    GeneratedReport getDailyStudyAnalysisReportByDate(Long userId, LocalDate date);
+    
+    /**
+     * 根据用户ID和日期获取最新的饮食分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 分析报告
+     */
+    GeneratedReport getDailyDietAnalysisReportByDate(Long userId, LocalDate date);
+    
+    /**
+     * 根据用户ID和日期获取最新的财务分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 分析报告
+     */
+    GeneratedReport getDailyFinanceAnalysisReportByDate(Long userId, LocalDate date);
+    
+    /**
      * 生成日报
      * @param userId 用户ID
      * @param date 日期
@@ -58,6 +90,38 @@ public interface AIAnalysisService {
      * @return 生成的报告
      */
     GeneratedReport generateMonthlyReport(Long userId, LocalDate date);
+    
+    /**
+     * 生成每日日程分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 生成的报告
+     */
+    GeneratedReport generateDailyScheduleAnalysisReport(Long userId, LocalDate date);
+    
+    /**
+     * 生成每日学习分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 生成的报告
+     */
+    GeneratedReport generateDailyStudyAnalysisReport(Long userId, LocalDate date);
+    
+    /**
+     * 生成每日饮食分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 生成的报告
+     */
+    GeneratedReport generateDailyDietAnalysisReport(Long userId, LocalDate date);
+    
+    /**
+     * 生成每日财务分析报告
+     * @param userId 用户ID
+     * @param date 日期
+     * @return 生成的报告
+     */
+    GeneratedReport generateDailyFinanceAnalysisReport(Long userId, LocalDate date);
     
     /**
      * 获取指定日期范围的每日聚合指标

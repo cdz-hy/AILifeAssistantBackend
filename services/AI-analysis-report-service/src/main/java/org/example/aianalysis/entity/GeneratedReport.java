@@ -1,5 +1,10 @@
 package org.example.aianalysis.entity;
 
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -13,7 +18,13 @@ public class GeneratedReport {
     private String reportType;
     private LocalDate startDate;
     private LocalDate endDate;
+    
+    // 使用@JsonRawValue注解，将reportDataJson作为原始JSON而不是字符串处理
+    @JsonRawValue
     private String reportDataJson;
+    
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime createdAt;
 
     // Constructors

@@ -9,32 +9,14 @@ import java.util.List;
 @Mapper
 public interface GeneratedReportMapper {
     
-    @Select("SELECT * FROM t_generated_report WHERE id = #{id}")
-    GeneratedReport selectById(Long id);
+    GeneratedReport selectByUserIdAndDate(@Param("userId") Long userId, @Param("reportType") String reportType, @Param("date") LocalDate date);
     
-    @Select("SELECT * FROM t_generated_report WHERE user_id = #{userId} AND report_type = #{reportType} " +
-            "AND start_date <= #{targetDate} AND end_date >= #{targetDate} ORDER BY created_at DESC LIMIT 1")
-    GeneratedReport selectByUserIdAndDate(@Param("userId") Long userId, 
-                                         @Param("reportType") String reportType,
-                                         @Param("targetDate") LocalDate targetDate);
+    void insert(GeneratedReport report);
     
-    @Select("SELECT * FROM t_generated_report WHERE user_id = #{userId} AND report_type = #{reportType} " +
-            "ORDER BY created_at DESC LIMIT 1")
-    GeneratedReport selectLatestByUserIdAndType(@Param("userId") Long userId, 
-                                               @Param("reportType") String reportType);
+    void update(GeneratedReport report);
     
-    @Select("SELECT * FROM t_generated_report WHERE user_id = #{userId} ORDER BY created_at DESC")
-    List<GeneratedReport> selectByUserId(Long userId);
+    void deleteById(Long id);
     
-    @Insert("INSERT INTO t_generated_report(user_id, report_type, start_date, end_date, report_data_json, created_at) " +
-            "VALUES(#{userId}, #{reportType}, #{startDate}, #{endDate}, #{reportDataJson}, #{createdAt})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    int insert(GeneratedReport report);
-    
-    @Update("UPDATE t_generated_report SET report_data_json = #{reportDataJson}, created_at = #{createdAt} " +
-            "WHERE id = #{id}")
-    int update(GeneratedReport report);
-    
-    @Delete("DELETE FROM t_generated_report WHERE id = #{id}")
-    int deleteById(Long id);
+    List<GeneratedReport> selectByUserIdAndDateRange(@Param("userId") Long userId, @Param("reportType") String reportType, 
+                                                    @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

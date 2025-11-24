@@ -12,4 +12,30 @@
         <result property="createdAt" column="created_at"/>
     </resultMap>
     
+    <select id="selectByUserIdAndDate" parameterType="map" resultMap="GeneratedReportResultMap">
+        SELECT * FROM t_generated_report 
+        WHERE user_id = #{userId} AND report_type = #{reportType} AND start_date &lt;= #{date} AND end_date &gt;= #{date}
+    </select>
+    
+    <select id="selectByUserIdAndDateRange" parameterType="map" resultMap="GeneratedReportResultMap">
+        SELECT * FROM t_generated_report 
+        WHERE user_id = #{userId} AND report_type = #{reportType} 
+        AND start_date &gt;= #{startDate} AND end_date &lt;= #{endDate} 
+        ORDER BY start_date
+    </select>
+    
+    <insert id="insert" parameterType="org.example.aianalysis.entity.GeneratedReport" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_generated_report(user_id, report_type, start_date, end_date, report_data_json, created_at)
+        VALUES(#{userId}, #{reportType}, #{startDate}, #{endDate}, #{reportDataJson}, #{createdAt})
+    </insert>
+    
+    <update id="update" parameterType="org.example.aianalysis.entity.GeneratedReport">
+        UPDATE t_generated_report 
+        SET report_data_json = #{reportDataJson}, created_at = #{createdAt}
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_generated_report WHERE id = #{id}
+    </delete>
 </mapper>

@@ -2,6 +2,11 @@ package org.example.aianalysis.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,12 +17,12 @@ import java.util.List;
 public class AnalysisRequestDTO {
     @JsonProperty("current_time")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime currentTime;
     
     private String location;
-    
     private WeatherInfo weather;
-    
     @JsonProperty("recent_schedules")
     private List<SimplifiedSchedule> recentSchedules;
     

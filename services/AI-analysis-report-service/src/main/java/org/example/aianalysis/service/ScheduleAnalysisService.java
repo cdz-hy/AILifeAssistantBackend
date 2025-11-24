@@ -65,7 +65,7 @@ public class ScheduleAnalysisService {
             // 2. 组装 Prompt Data (DTO)
             AnalysisRequestDTO promptData = new AnalysisRequestDTO();
             promptData.setCurrentTime(LocalDateTime.now());
-            promptData.setLocation("南昌");
+            promptData.setLocation("北京");
             
             // 处理天气信息
             AnalysisRequestDTO.WeatherInfo weatherInfo = new AnalysisRequestDTO.WeatherInfo();
@@ -316,7 +316,7 @@ public class ScheduleAnalysisService {
                 "4. 【前瞻准备】：若\"明天\"上午 10:00 前有\"重要\"日程，建议今天晚上预留准备时间。\n" +
                 "5. 【语气风格】：亲切、简洁、行动导向。不要说废话，直接给建议。\n\n" +
                 "输出格式要求：\n" +
-                "必须严格返回 JSON 格式列表，不要包含 Markdown 标记或其他废话。尽量从多角度进行分析，回答内容丰富多条，格式如下：\n" +
+                "必须严格返回 JSON 格式列表，不要包含 Markdown 标记或其他废话。格式如下：\n" +
                 "[\n" +
                 "  {\n" +
                 "    \"type\": \"weather\" | \"energy\" | \"conflict\" | \"preparation\",\n" +

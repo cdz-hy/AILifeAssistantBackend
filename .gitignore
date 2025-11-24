@@ -35,3 +35,4 @@ build/
 ### Docs Ignores ###
 docs/
 logs/
+uploads/

@@ -54,7 +54,7 @@ public class TransactionController {
                 return ResponseEntity.badRequest().build();
             }
 
-            List<Transaction> transactions = transactionService.getRecentTransactions(actualUserId, 10);
+            List<Transaction> transactions = transactionService.getRecentTransactions(actualUserId, 20);
 
             List<TransactionDTO> recentTransactions = transactions.stream()
                     .map(this::convertToDTO)

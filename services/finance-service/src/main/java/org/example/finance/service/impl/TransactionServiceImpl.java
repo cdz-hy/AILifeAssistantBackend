@@ -6,6 +6,8 @@ import org.example.finance.mapper.TransactionMapper;
 import org.example.finance.service.TransactionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -44,15 +46,19 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setDescription(request.getDescription());
         transaction.setCategoryId(request.getCategoryId());
         transaction.setCurrencyCode(request.getCurrencyCode());
+        transaction.setAiSuggestionJson("{}");
 
         transactionMapper.insert(transaction);
 
-        // 简化版本：只记录日志，不发送消息队列
+        Transaction createdTransaction = transactionMapper.findById(transaction.getId());
+
         System.out.println("新交易创建 - 用户: " + userId +
                 ", 金额: " + request.getAmount() +
-                ", 类型: " + request.getType());
+                ", 类型: " + request.getType() +
+                ", 日期: " + request.getTransactionDate() +
+                ", 分类: " + request.getCategoryId());
 
-        return transactionMapper.findById(transaction.getId());
+        return createdTransaction;
     }
 
     @Override
@@ -68,7 +74,23 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void publishTransactionEvent(Transaction transaction) {
-        // 简化版本：空实现，需要时再集成消息队列
         System.out.println("交易事件发布（模拟）: " + transaction.getId());
+    }
+
+    @Override
+    public List<Transaction> getRecentTransactions(Long userId, int limit) {
+        return transactionMapper.findRecentByUserId(userId, limit);
+    }
+
+    @Override
+    public BigDecimal getMonthlyIncome(Long userId, int year, int month) {
+        return transactionMapper.getMonthlyIncome(userId, year, month);
+    }
+
+    @Override
+    public BigDecimal getMonthlyExpense(Long userId, int year, int month) {
+        BigDecimal expense = transactionMapper.getMonthlyExpense(userId, year, month);
+        System.out.println("查询本月支出 - 用户: " + userId + ", 年月: " + year + "-" + month + ", 支出: " + expense);
+        return expense;
     }
 }

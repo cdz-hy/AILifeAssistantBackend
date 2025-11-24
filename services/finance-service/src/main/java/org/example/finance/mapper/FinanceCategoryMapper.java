@@ -24,4 +24,10 @@ public interface FinanceCategoryMapper {
 
     @Delete("DELETE FROM t_finance_category WHERE id = #{id}")
     int delete(Long id);
+
+    @Select("SELECT * FROM t_finance_category WHERE user_id IS NULL ORDER BY id")
+    List<FinanceCategory> findSystemCategories();
+
+    @Select("SELECT * FROM t_finance_category WHERE category_name = #{categoryName} AND (user_id = #{userId} OR user_id IS NULL)")
+    FinanceCategory findByNameAndUserId(@Param("categoryName") String categoryName, @Param("userId") Long userId);
 }

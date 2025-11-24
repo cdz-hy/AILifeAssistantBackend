@@ -7,7 +7,7 @@ import java.util.List;
 @Mapper
 public interface BudgetMapper {
 
-    @Select("SELECT b.*, c.category_name FROM t_budget b " +
+    @Select("SELECT b.*, c.category_name AS categoryName FROM t_budget b " +
             "LEFT JOIN t_finance_category c ON b.category_id = c.id " +
             "WHERE b.user_id = #{userId} AND b.budget_year = #{year} AND b.budget_month = #{month}")
     List<Budget> findByUserIdAndMonth(@Param("userId") Long userId,
@@ -29,8 +29,16 @@ public interface BudgetMapper {
     int delete(Long id);
 
     // 添加缺失的方法
-    @Select("SELECT * FROM t_budget WHERE user_id = #{userId} AND category_id = #{categoryId} " +
-            "AND budget_year = #{year} AND budget_month = #{month}")
+    @Select("<script>" +
+            "SELECT * FROM t_budget WHERE user_id = #{userId} " +
+            "AND budget_year = #{year} AND budget_month = #{month} " +
+            "<if test='categoryId != null'>" +
+            "AND category_id = #{categoryId}" +
+            "</if>" +
+            "<if test='categoryId == null'>" +
+            "AND category_id IS NULL" +
+            "</if>" +
+            "</script>")
     Budget findByUserCategoryAndMonth(@Param("userId") Long userId,
                                       @Param("categoryId") Long categoryId,
                                       @Param("year") Integer year,

@@ -25,8 +25,14 @@ public class BudgetServiceImpl implements BudgetService {
 
         // 计算每个预算的当前支出和剩余金额
         for (Budget budget : budgets) {
-            BigDecimal currentSpending = transactionMapper.getMonthlyExpenseByCategory(
-                    userId, budget.getCategoryId(), year, month);
+            BigDecimal currentSpending;
+            // 如果categoryId为null，表示总预算，使用总支出统计
+            if (budget.getCategoryId() == null) {
+                currentSpending = transactionMapper.getMonthlyExpense(userId, year, month);
+            } else {
+                currentSpending = transactionMapper.getMonthlyExpenseByCategory(
+                        userId, budget.getCategoryId(), year, month);
+            }
             budget.setCurrentSpending(currentSpending != null ? currentSpending : BigDecimal.ZERO);
 
             BigDecimal currentSpendingValue = budget.getCurrentSpending() != null ? budget.getCurrentSpending() : BigDecimal.ZERO;

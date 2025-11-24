@@ -4,8 +4,8 @@ import org.example.finance.entity.FinanceCategory;
 import org.example.finance.mapper.FinanceCategoryMapper;
 import org.example.finance.service.FinanceCategoryService;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +20,11 @@ public class FinanceCategoryServiceImpl implements FinanceCategoryService {
     @Override
     public List<FinanceCategory> getUserCategories(Long userId) {
         return categoryMapper.findByUserId(userId);
+    }
+
+    @Override
+    public List<FinanceCategory> getSystemCategories() {
+        return categoryMapper.findSystemCategories();
     }
 
     @Override

@@ -60,10 +60,12 @@ public class BudgetController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Budget> updateBudget(
+            @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id,
             @RequestBody Budget budget) {
         try {
             budget.setId(id);
+            budget.setUserId(userId);
             Budget updatedBudget = budgetService.updateBudget(budget);
             return ResponseEntity.ok(updatedBudget);
         } catch (Exception e) {

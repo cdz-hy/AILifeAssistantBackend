@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.user.mapper.UserProfileMapper">
+    <resultMap id="UserProfileResult" type="org.example.user.entity.UserProfile">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+    </resultMap>
+
+    <select id="findByUserId" parameterType="long" resultMap="UserProfileResult">
+        select * from t_user_profile where user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="org.example.user.entity.UserProfile" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user_profile(user_id, nickname, avatar_url)
+        values(#{userId}, #{nickname}, #{avatarUrl})
+    </insert>
+
+    <update id="update">
+        update t_user_profile set nickname = #{nickname}, avatar_url = #{avatarUrl} where user_id = #{userId}
+    </update>
+</mapper>

@@ -28,7 +28,6 @@ public class ScheduleDTO {
     private List<ScheduleReminderDTO> reminders;
     private List<ScheduleAISuggestionDTO> aiSuggestions;
     
-    
     // Constructors
     public ScheduleDTO() {}
     
@@ -188,6 +187,5 @@ public class ScheduleDTO {
     public void setAiSuggestions(List<ScheduleAISuggestionDTO> aiSuggestions) {
         this.aiSuggestions = aiSuggestions;
     }
-    
-    
+
 }

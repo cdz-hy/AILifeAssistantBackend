@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.user.mapper.DataAuthorizationMapper">
+    <resultMap id="AuthResult" type="org.example.user.entity.DataAuthorization">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="dataType" column="data_type"/>
+        <result property="isAuthorized" column="is_authorized"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findOne" resultMap="AuthResult">
+        select * from t_data_authorization where user_id = #{userId} and data_type = #{dataType}
+    </select>
+
+    <select id="listByUserId" parameterType="long" resultMap="AuthResult">
+        select * from t_data_authorization where user_id = #{userId}
+    </select>
+
+    <insert id="upsert">
+        insert into t_data_authorization(user_id, data_type, is_authorized)
+        values(#{userId}, #{dataType}, #{isAuthorized})
+        on duplicate key update is_authorized = values(is_authorized), updated_at = CURRENT_TIMESTAMP
+    </insert>
+</mapper>

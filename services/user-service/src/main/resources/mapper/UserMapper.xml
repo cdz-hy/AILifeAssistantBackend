@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.user.mapper.UserMapper">
+    <resultMap id="UserResult" type="org.example.user.entity.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="nickname" column="nickname"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="consentHealthAnalysis" column="consent_health_analysis"/>
+        <result property="consentFinanceAnalysis" column="consent_finance_analysis"/>
+        <result property="personaJson" column="persona_json"/>
+    </resultMap>
+
+    <select id="findById" parameterType="string" resultMap="UserResult">
+        select * from users where id = #{id}
+    </select>
+
+    <select id="findByUsername" parameterType="string" resultMap="UserResult">
+        select * from users where username = #{username}
+    </select>
+
+    <insert id="insert" parameterType="org.example.user.entity.User">
+        insert into users(id, username, password_hash, nickname, avatar_url, consent_health_analysis, consent_finance_analysis, persona_json)
+        values(#{id}, #{username}, #{passwordHash}, #{nickname}, #{avatarUrl}, #{consentHealthAnalysis}, #{consentFinanceAnalysis}, #{personaJson})
+    </insert>
+
+    <update id="updateProfile">
+        update users set nickname = #{nickname}, avatar_url = #{avatarUrl} where id = #{id}
+    </update>
+
+    <update id="updateAuthorizations">
+        update users set consent_health_analysis = #{consentHealthAnalysis}, consent_finance_analysis = #{consentFinanceAnalysis} where id = #{id}
+    </update>
+
+    <update id="updatePersona">
+        update users set persona_json = #{personaJson} where id = #{id}
+    </update>
+
+    <select id="listDeviceIds" parameterType="string" resultType="string">
+        select device_id from user_device where user_id = #{userId}
+    </select>
+</mapper>

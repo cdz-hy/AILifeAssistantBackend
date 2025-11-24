@@ -76,7 +76,7 @@ public class GatewayMetricsConfig {
                         log.error("请求处理出错 - 路径: {}, 方法: {}, 错误: {}", path, method, throwable.getMessage());
                         return Mono.error(throwable);
                     })
-                    .then();
+                    .thenEmpty(Mono.empty());
         };
     }
 }

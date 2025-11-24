@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.user.mapper.UserDeviceMapper">
+    <delete id="deleteByUserId">
+        delete from user_device where user_id = #{userId}
+    </delete>
+
+    <insert id="insert">
+        insert into user_device(user_id, device_id) values(#{userId}, #{deviceId})
+    </insert>
+
+    <select id="listDeviceIds" parameterType="string" resultType="string">
+        select device_id from user_device where user_id = #{userId}
+    </select>
+</mapper>

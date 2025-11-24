@@ -1,5 +1,7 @@
 package org.example.schedule.dto;
 
+import org.example.schedule.util.RecurrencePatternConverter;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,11 +22,11 @@ public class ScheduleDTO {
     private Boolean isUrgent;
     private Boolean isImportant;
     private String recurrenceRule;
+    private RecurrencePatternDTO recurrencePattern;
     private String status;
     private List<String> tags;
     private List<ScheduleReminderDTO> reminders;
     private List<ScheduleAISuggestionDTO> aiSuggestions;
-    private List<ScheduleExceptionDTO> exceptions;
     
     // Constructors
     public ScheduleDTO() {}
@@ -119,11 +121,39 @@ public class ScheduleDTO {
     }
     
     public String getRecurrenceRule() {
+        // 如果有RecurrencePatternDTO，则从它生成RRULE字符串
+        if (recurrencePattern != null) {
+            org.example.schedule.entity.RecurrencePattern pattern = RecurrencePatternConverter.toEntity(recurrencePattern);
+            return org.example.schedule.util.RRuleUtils.toRRule(pattern);
+        }
         return recurrenceRule;
     }
     
     public void setRecurrenceRule(String recurrenceRule) {
         this.recurrenceRule = recurrenceRule;
+        // 同时更新RecurrencePatternDTO
+        if (recurrenceRule != null && !recurrenceRule.isEmpty()) {
+            org.example.schedule.entity.RecurrencePattern pattern = org.example.schedule.util.RRuleUtils.fromRRule(recurrenceRule);
+            this.recurrencePattern = RecurrencePatternConverter.toDTO(pattern);
+        }
+    }
+    
+    public RecurrencePatternDTO getRecurrencePattern() {
+        // 如果还没有RecurrencePatternDTO但有recurrenceRule，则解析它
+        if (recurrencePattern == null && recurrenceRule != null && !recurrenceRule.isEmpty()) {
+            org.example.schedule.entity.RecurrencePattern pattern = org.example.schedule.util.RRuleUtils.fromRRule(recurrenceRule);
+            recurrencePattern = RecurrencePatternConverter.toDTO(pattern);
+        }
+        return recurrencePattern;
+    }
+    
+    public void setRecurrencePattern(RecurrencePatternDTO recurrencePattern) {
+        this.recurrencePattern = recurrencePattern;
+        // 同时更新recurrenceRule字符串
+        if (recurrencePattern != null) {
+            org.example.schedule.entity.RecurrencePattern pattern = RecurrencePatternConverter.toEntity(recurrencePattern);
+            this.recurrenceRule = org.example.schedule.util.RRuleUtils.toRRule(pattern);
+        }
     }
     
     public String getStatus() {
@@ -157,12 +187,5 @@ public class ScheduleDTO {
     public void setAiSuggestions(List<ScheduleAISuggestionDTO> aiSuggestions) {
         this.aiSuggestions = aiSuggestions;
     }
-    
-    public List<ScheduleExceptionDTO> getExceptions() {
-        return exceptions;
-    }
-    
-    public void setExceptions(List<ScheduleExceptionDTO> exceptions) {
-        this.exceptions = exceptions;
-    }
+
 }

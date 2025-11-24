@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.aianalysis.mapper.AiModelInfoMapper">
+    
+    <resultMap id="AiModelInfoResultMap" type="org.example.aianalysis.entity.AiModelInfo">
+        <id property="id" column="id"/>
+        <result property="modelName" column="model_name"/>
+        <result property="version" column="version"/>
+        <result property="description" column="description"/>
+    </resultMap>
+    
+</mapper>

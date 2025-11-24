@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.user.mapper.PersonaMetricMapper">
+    <resultMap id="PersonaResult" type="org.example.user.entity.PersonaMetric">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="metricName" column="metric_name"/>
+        <result property="metricValue" column="metric_value"/>
+        <result property="lastUpdatedBy" column="last_updated_by"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="listByUserId" parameterType="long" resultMap="PersonaResult">
+        select * from t_user_persona_metric where user_id = #{userId}
+    </select>
+
+    <insert id="upsert">
+        insert into t_user_persona_metric(user_id, metric_name, metric_value, last_updated_by)
+        values(#{userId}, #{metricName}, #{metricValue}, #{lastUpdatedBy})
+        on duplicate key update metric_value = values(metric_value), last_updated_by = values(last_updated_by), updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+    <delete id="deleteAllByUserId">
+        delete from t_user_persona_metric where user_id = #{userId}
+    </delete>
+</mapper>

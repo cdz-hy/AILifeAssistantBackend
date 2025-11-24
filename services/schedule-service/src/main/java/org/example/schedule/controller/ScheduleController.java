@@ -3,14 +3,15 @@ package org.example.schedule.controller;
 import org.example.schedule.entity.Schedule;
 import org.example.schedule.entity.ScheduleType;
 import org.example.schedule.entity.ScheduleTag;
-import org.example.schedule.entity.ScheduleReminder;
-import org.example.schedule.entity.ScheduleAISuggestion;
-import org.example.schedule.entity.ScheduleException;
-import org.example.schedule.service.ScheduleService;
+import org.example.schedule.service.ScheduleManagementService;
+import org.example.schedule.service.ScheduleTypeService;
+import org.example.schedule.service.ScheduleTagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -22,7 +23,13 @@ import java.util.List;
 public class ScheduleController {
     
     @Autowired
-    private ScheduleService scheduleService;
+    private ScheduleManagementService scheduleManagementService;
+    
+    @Autowired
+    private ScheduleTypeService scheduleTypeService;
+    
+    @Autowired
+    private ScheduleTagService scheduleTagService;
     
     // Schedule endpoints
     /**
@@ -32,7 +39,7 @@ public class ScheduleController {
      */
     @GetMapping("/{id}")
     public Schedule getScheduleById(@PathVariable Long id) {
-        return scheduleService.getScheduleById(id);
+        return scheduleManagementService.getScheduleById(id);
     }
     
     /**
@@ -42,7 +49,7 @@ public class ScheduleController {
      */
     @GetMapping("/user/{userId}")
     public List<Schedule> getSchedulesByUserId(@PathVariable Long userId) {
-        return scheduleService.getSchedulesByUserId(userId);
+        return scheduleManagementService.getSchedulesByUserId(userId);
     }
     
     /**
@@ -57,9 +64,15 @@ public class ScheduleController {
             @PathVariable Long userId,
             @RequestParam String startTime,
             @RequestParam String endTime) {
-        LocalDateTime start = LocalDateTime.parse(startTime);
-        LocalDateTime end = LocalDateTime.parse(endTime);
-        return scheduleService.getSchedulesByUserIdAndDateRange(userId, start, end);
+        // 使用Instant处理带时区的ISO 8601格式时间
+        Instant startInstant = Instant.parse(startTime);
+        Instant endInstant = Instant.parse(endTime);
+        
+        // 转换为LocalDateTime（忽略时区信息）
+        LocalDateTime start = startInstant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime end = endInstant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+        
+        return scheduleManagementService.getSchedulesByUserIdAndDateRange(userId, start, end);
     }
     
     /**
@@ -69,7 +82,7 @@ public class ScheduleController {
      */
     @GetMapping("/type/{typeId}")
     public List<Schedule> getSchedulesByTypeId(@PathVariable Long typeId) {
-        return scheduleService.getSchedulesByTypeId(typeId);
+        return scheduleManagementService.getSchedulesByTypeId(typeId);
     }
     
     /**
@@ -80,7 +93,7 @@ public class ScheduleController {
      */
     @GetMapping("/user/{userId}/status/{status}")
     public List<Schedule> getSchedulesByUserIdAndStatus(@PathVariable Long userId, @PathVariable String status) {
-        return scheduleService.getSchedulesByUserIdAndStatus(userId, status);
+        return scheduleManagementService.getSchedulesByUserIdAndStatus(userId, status);
     }
     
     /**
@@ -95,7 +108,7 @@ public class ScheduleController {
             @PathVariable Long userId,
             @RequestParam Boolean isUrgent,
             @RequestParam Boolean isImportant) {
-        return scheduleService.getSchedulesByUrgencyAndImportance(userId, isUrgent, isImportant);
+        return scheduleManagementService.getSchedulesByUrgencyAndImportance(userId, isUrgent, isImportant);
     }
     
     /**
@@ -105,7 +118,7 @@ public class ScheduleController {
      */
     @PostMapping
     public Schedule createSchedule(@RequestBody Schedule schedule) {
-        return scheduleService.createSchedule(schedule);
+        return scheduleManagementService.createSchedule(schedule);
     }
     
     /**
@@ -117,7 +130,7 @@ public class ScheduleController {
     @PutMapping("/{id}")
     public Schedule updateSchedule(@PathVariable Long id, @RequestBody Schedule schedule) {
         schedule.setId(id);
-        return scheduleService.updateSchedule(schedule);
+        return scheduleManagementService.updateSchedule(schedule);
     }
     
     /**
@@ -126,7 +139,7 @@ public class ScheduleController {
      */
     @DeleteMapping("/{id}")
     public void deleteSchedule(@PathVariable Long id) {
-        scheduleService.deleteSchedule(id);
+        scheduleManagementService.deleteSchedule(id);
     }
     
     // Schedule Type endpoints
@@ -137,7 +150,7 @@ public class ScheduleController {
      */
     @GetMapping("/types/{id}")
     public ScheduleType getScheduleTypeById(@PathVariable Long id) {
-        return scheduleService.getScheduleTypeById(id);
+        return scheduleTypeService.getScheduleTypeById(id);
     }
     
     /**
@@ -147,7 +160,7 @@ public class ScheduleController {
      */
     @GetMapping("/types/user/{userId}")
     public List<ScheduleType> getScheduleTypesByUserId(@PathVariable Long userId) {
-        return scheduleService.getScheduleTypesByUserId(userId);
+        return scheduleTypeService.getScheduleTypesByUserId(userId);
     }
     
     /**
@@ -157,7 +170,7 @@ public class ScheduleController {
      */
     @PostMapping("/types")
     public ScheduleType createScheduleType(@RequestBody ScheduleType scheduleType) {
-        return scheduleService.createScheduleType(scheduleType);
+        return scheduleTypeService.createScheduleType(scheduleType);
     }
     
     /**
@@ -169,7 +182,7 @@ public class ScheduleController {
     @PutMapping("/types/{id}")
     public ScheduleType updateScheduleType(@PathVariable Long id, @RequestBody ScheduleType scheduleType) {
         scheduleType.setId(id);
-        return scheduleService.updateScheduleType(scheduleType);
+        return scheduleTypeService.updateScheduleType(scheduleType);
     }
     
     /**
@@ -178,7 +191,7 @@ public class ScheduleController {
      */
     @DeleteMapping("/types/{id}")
     public void deleteScheduleType(@PathVariable Long id) {
-        scheduleService.deleteScheduleType(id);
+        scheduleTypeService.deleteScheduleType(id);
     }
     
     // Schedule Tag endpoints
@@ -189,7 +202,7 @@ public class ScheduleController {
      */
     @GetMapping("/tags/{id}")
     public ScheduleTag getScheduleTagById(@PathVariable Long id) {
-        return scheduleService.getScheduleTagById(id);
+        return scheduleTagService.getScheduleTagById(id);
     }
     
     /**
@@ -198,7 +211,7 @@ public class ScheduleController {
      */
     @GetMapping("/tags")
     public List<ScheduleTag> getAllScheduleTags() {
-        return scheduleService.getAllScheduleTags();
+        return scheduleTagService.getAllScheduleTags();
     }
     
     /**
@@ -208,7 +221,7 @@ public class ScheduleController {
      */
     @PostMapping("/tags")
     public ScheduleTag createScheduleTag(@RequestBody ScheduleTag scheduleTag) {
-        return scheduleService.createScheduleTag(scheduleTag);
+        return scheduleTagService.createScheduleTag(scheduleTag);
     }
     
     /**
@@ -220,7 +233,7 @@ public class ScheduleController {
     @PutMapping("/tags/{id}")
     public ScheduleTag updateScheduleTag(@PathVariable Long id, @RequestBody ScheduleTag scheduleTag) {
         scheduleTag.setId(id);
-        return scheduleService.updateScheduleTag(scheduleTag);
+        return scheduleTagService.updateScheduleTag(scheduleTag);
     }
     
     /**
@@ -229,7 +242,7 @@ public class ScheduleController {
      */
     @DeleteMapping("/tags/{id}")
     public void deleteScheduleTag(@PathVariable Long id) {
-        scheduleService.deleteScheduleTag(id);
+        scheduleTagService.deleteScheduleTag(id);
     }
     
     /**
@@ -239,7 +252,7 @@ public class ScheduleController {
      */
     @PostMapping("/{scheduleId}/tags/{tagId}")
     public void addTagToSchedule(@PathVariable Long scheduleId, @PathVariable Long tagId) {
-        scheduleService.addTagToSchedule(scheduleId, tagId);
+        scheduleTagService.addTagToSchedule(scheduleId, tagId);
     }
     
     /**
@@ -249,171 +262,6 @@ public class ScheduleController {
      */
     @DeleteMapping("/{scheduleId}/tags/{tagId}")
     public void removeTagFromSchedule(@PathVariable Long scheduleId, @PathVariable Long tagId) {
-        scheduleService.removeTagFromSchedule(scheduleId, tagId);
-    }
-    
-    // Reminder endpoints
-    /**
-     * 根据ID获取提醒
-     * @param id 提醒ID
-     * @return 提醒实体
-     */
-    @GetMapping("/reminders/{id}")
-    public ScheduleReminder getReminderById(@PathVariable Long id) {
-        return scheduleService.getReminderById(id);
-    }
-    
-    /**
-     * 根据日程ID获取提醒
-     * @param scheduleId 日程ID
-     * @return 提醒列表
-     */
-    @GetMapping("/reminders/schedule/{scheduleId}")
-    public List<ScheduleReminder> getRemindersByScheduleId(@PathVariable Long scheduleId) {
-        return scheduleService.getRemindersByScheduleId(scheduleId);
-    }
-    
-    /**
-     * 获取待处理的提醒
-     * @return 提醒列表
-     */
-    @GetMapping("/reminders/pending")
-    public List<ScheduleReminder> getPendingReminders() {
-        return scheduleService.getPendingReminders();
-    }
-    
-    /**
-     * 创建提醒
-     * @param reminder 提醒实体
-     * @return 创建后的提醒实体
-     */
-    @PostMapping("/reminders")
-    public ScheduleReminder createReminder(@RequestBody ScheduleReminder reminder) {
-        return scheduleService.createReminder(reminder);
-    }
-    
-    /**
-     * 更新提醒
-     * @param id 提醒ID
-     * @param reminder 提醒实体
-     * @return 更新后的提醒实体
-     */
-    @PutMapping("/reminders/{id}")
-    public ScheduleReminder updateReminder(@PathVariable Long id, @RequestBody ScheduleReminder reminder) {
-        reminder.setId(id);
-        return scheduleService.updateReminder(reminder);
-    }
-    
-    /**
-     * 删除提醒
-     * @param id 提醒ID
-     */
-    @DeleteMapping("/reminders/{id}")
-    public void deleteReminder(@PathVariable Long id) {
-        scheduleService.deleteReminder(id);
-    }
-    
-    // AI Suggestion endpoints
-    /**
-     * 根据ID获取AI建议
-     * @param id 建议ID
-     * @return AI建议实体
-     */
-    @GetMapping("/suggestions/{id}")
-    public ScheduleAISuggestion getAISuggestionById(@PathVariable Long id) {
-        return scheduleService.getAISuggestionById(id);
-    }
-    
-    /**
-     * 根据日程ID获取AI建议
-     * @param scheduleId 日程ID
-     * @return AI建议列表
-     */
-    @GetMapping("/suggestions/schedule/{scheduleId}")
-    public List<ScheduleAISuggestion> getAISuggestionsByScheduleId(@PathVariable Long scheduleId) {
-        return scheduleService.getAISuggestionsByScheduleId(scheduleId);
-    }
-    
-    /**
-     * 创建AI建议
-     * @param aiSuggestion AI建议实体
-     * @return 创建后的AI建议实体
-     */
-    @PostMapping("/suggestions")
-    public ScheduleAISuggestion createAISuggestion(@RequestBody ScheduleAISuggestion aiSuggestion) {
-        return scheduleService.createAISuggestion(aiSuggestion);
-    }
-    
-    /**
-     * 更新AI建议
-     * @param id 建议ID
-     * @param aiSuggestion AI建议实体
-     * @return 更新后的AI建议实体
-     */
-    @PutMapping("/suggestions/{id}")
-    public ScheduleAISuggestion updateAISuggestion(@PathVariable Long id, @RequestBody ScheduleAISuggestion aiSuggestion) {
-        aiSuggestion.setId(id);
-        return scheduleService.updateAISuggestion(aiSuggestion);
-    }
-    
-    /**
-     * 删除AI建议
-     * @param id 建议ID
-     */
-    @DeleteMapping("/suggestions/{id}")
-    public void deleteAISuggestion(@PathVariable Long id) {
-        scheduleService.deleteAISuggestion(id);
-    }
-    
-    // Schedule Exception endpoints
-    /**
-     * 根据ID获取日程例外
-     * @param id 例外ID
-     * @return 日程例外实体
-     */
-    @GetMapping("/exceptions/{id}")
-    public ScheduleException getScheduleExceptionById(@PathVariable Long id) {
-        return scheduleService.getScheduleExceptionById(id);
-    }
-    
-    /**
-     * 根据日程ID获取例外
-     * @param scheduleId 日程ID
-     * @return 日程例外列表
-     */
-    @GetMapping("/exceptions/schedule/{scheduleId}")
-    public List<ScheduleException> getScheduleExceptionsByScheduleId(@PathVariable Long scheduleId) {
-        return scheduleService.getScheduleExceptionsByScheduleId(scheduleId);
-    }
-    
-    /**
-     * 创建日程例外
-     * @param scheduleException 日程例外实体
-     * @return 创建后的日程例外实体
-     */
-    @PostMapping("/exceptions")
-    public ScheduleException createScheduleException(@RequestBody ScheduleException scheduleException) {
-        return scheduleService.createScheduleException(scheduleException);
-    }
-    
-    /**
-     * 更新日程例外
-     * @param id 例外ID
-     * @param scheduleException 日程例外实体
-     * @return 更新后的日程例外实体
-     */
-    @PutMapping("/exceptions/{id}")
-    public ScheduleException updateScheduleException(@PathVariable Long id, @RequestBody ScheduleException scheduleException) {
-        scheduleException.setId(id);
-        return scheduleService.updateScheduleException(scheduleException);
-    }
-    
-    /**
-     * 删除日程例外
-     * @param id 例外ID
-     */
-    @DeleteMapping("/exceptions/{id}")
-    public void deleteScheduleException(@PathVariable Long id) {
-        scheduleService.deleteScheduleException(id);
+        scheduleTagService.removeTagFromSchedule(scheduleId, tagId);
     }
 }

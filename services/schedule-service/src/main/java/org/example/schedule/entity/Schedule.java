@@ -1,5 +1,7 @@
 package org.example.schedule.entity;
 
+import org.example.schedule.util.RRuleUtils;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,12 +24,14 @@ public class Schedule {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
+    // 添加RecurrencePattern支持
+    private RecurrencePattern recurrencePattern;
+    
     // 关联属性
     private ScheduleType type;
     private List<ScheduleTag> tags;
     private List<ScheduleReminder> reminders;
     private List<ScheduleAISuggestion> aiSuggestions;
-    private List<ScheduleException> exceptions;
 
     // Constructors
     public Schedule() {}
@@ -124,11 +128,42 @@ public class Schedule {
     }
 
     public String getRecurrenceRule() {
-        return recurrenceRule;
+        // 优先返回原始的recurrenceRule字段值
+        if (recurrenceRule != null) {
+            return recurrenceRule;
+        }
+        // 如果recurrenceRule为空但有RecurrencePattern，则从它生成RRULE字符串
+        if (recurrencePattern != null) {
+            return RRuleUtils.toRRule(recurrencePattern);
+        }
+        return null;
     }
 
     public void setRecurrenceRule(String recurrenceRule) {
         this.recurrenceRule = recurrenceRule;
+        // 同时更新RecurrencePattern
+        if (recurrenceRule != null && !recurrenceRule.isEmpty()) {
+            this.recurrencePattern = RRuleUtils.fromRRule(recurrenceRule);
+        }
+    }
+    
+    // RecurrencePattern相关的getter和setter
+    public RecurrencePattern getRecurrencePattern() {
+        // 如果还没有RecurrencePattern但有recurrenceRule，则解析它
+        if (recurrencePattern == null && recurrenceRule != null && !recurrenceRule.isEmpty()) {
+            recurrencePattern = RRuleUtils.fromRRule(recurrenceRule);
+        }
+        return recurrencePattern;
+    }
+    
+    public void setRecurrencePattern(RecurrencePattern recurrencePattern) {
+        this.recurrencePattern = recurrencePattern;
+        // 同时更新recurrenceRule字符串
+        if (recurrencePattern != null) {
+            this.recurrenceRule = RRuleUtils.toRRule(recurrencePattern);
+        } else {
+            this.recurrenceRule = null;
+        }
     }
 
     public String getStatus() {
@@ -187,12 +222,5 @@ public class Schedule {
     public void setAiSuggestions(List<ScheduleAISuggestion> aiSuggestions) {
         this.aiSuggestions = aiSuggestions;
     }
-    
-    public List<ScheduleException> getExceptions() {
-        return exceptions;
-    }
-    
-    public void setExceptions(List<ScheduleException> exceptions) {
-        this.exceptions = exceptions;
-    }
+
 }

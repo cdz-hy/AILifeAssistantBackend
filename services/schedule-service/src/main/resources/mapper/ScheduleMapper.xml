@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.schedule.mapper.ScheduleMapper">
+    
+    <resultMap id="ScheduleResultMap" type="org.example.schedule.entity.Schedule">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="typeId" column="type_id"/>
+        <result property="urgent" column="is_urgent"/>
+        <result property="important" column="is_important"/>
+        <result property="recurrenceRule" column="recurrence_rule"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+    
+    <select id="selectById" parameterType="long" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule WHERE id = #{id}
+    </select>
+    
+    <select id="selectByUserId" parameterType="long" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule WHERE user_id = #{userId} ORDER BY start_time
+    </select>
+    
+    <select id="selectByUserIdAndDateRange" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule 
+        WHERE user_id = #{userId} 
+        AND start_time >= #{startTime} 
+        AND end_time <![CDATA[ <= ]]> #{endTime} 
+        ORDER BY start_time
+    </select>
+    
+    <select id="selectNonRecurringByUserIdAndDateRange" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule
+        WHERE user_id = #{userId}
+        AND recurrence_rule IS NULL
+        AND start_time >= #{startTime}
+        AND end_time <![CDATA[ <= ]]> #{endTime}
+        ORDER BY start_time
+    </select>
+    
+    <select id="selectRecurringStartedBefore" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule
+        WHERE user_id = #{userId}
+        AND recurrence_rule IS NOT NULL
+        AND start_time <![CDATA[ <= ]]> #{endTime}
+        ORDER BY start_time
+    </select>
+    
+    <select id="selectByTypeId" parameterType="long" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule WHERE type_id = #{typeId}
+    </select>
+    
+    <select id="selectByUserIdAndStatus" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule 
+        WHERE user_id = #{userId} 
+        AND status = #{status} 
+        ORDER BY start_time
+    </select>
+    
+    <select id="selectByUrgencyAndImportance" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule 
+        WHERE user_id = #{userId} 
+        AND is_urgent = #{isUrgent} 
+        AND is_important = #{isImportant} 
+        ORDER BY start_time
+    </select>
+    
+    <select id="selectByMultipleConditions" resultMap="ScheduleResultMap">
+        SELECT * FROM t_schedule
+        <where>
+            user_id = #{userId}
+            <if test="typeId != null">
+                AND type_id = #{typeId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="isUrgent != null">
+                AND is_urgent = #{isUrgent}
+            </if>
+            <if test="isImportant != null">
+                AND is_important = #{isImportant}
+            </if>
+            <if test="startTime != null">
+                AND start_time >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND end_time <![CDATA[ <= ]]> #{endTime}
+            </if>
+        </where>
+        ORDER BY start_time
+    </select>
+    
+    <insert id="insert" parameterType="org.example.schedule.entity.Schedule" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_schedule(user_id, title, description, start_time, end_time, type_id, is_urgent, is_important, recurrence_rule, status, created_at, updated_at)
+        VALUES(#{userId}, #{title}, #{description}, #{startTime}, #{endTime}, #{typeId}, #{urgent}, #{important}, #{recurrenceRule}, #{status}, #{createdAt}, #{updatedAt})
+    </insert>
+    
+    <update id="update" parameterType="org.example.schedule.entity.Schedule">
+        UPDATE t_schedule 
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="typeId != null">type_id = #{typeId},</if>
+            <if test="urgent != null">is_urgent = #{urgent},</if>
+            <if test="important != null">is_important = #{important},</if>
+            <if test="recurrenceRule != null">recurrence_rule = #{recurrenceRule},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = #{updatedAt}
+        </set>
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_schedule WHERE id = #{id}
+    </delete>
+    
+</mapper>

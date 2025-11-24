@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.user.mapper.BoundDeviceMapper">
+    <delete id="deleteByUserId">
+        delete from t_bound_device where user_id = #{userId}
+    </delete>
+
+    <insert id="insert">
+        insert into t_bound_device(user_id, device_type, device_token)
+        values(#{userId}, #{deviceType}, #{deviceToken})
+    </insert>
+
+    <select id="listDeviceTokens" parameterType="long" resultType="string">
+        select device_token from t_bound_device where user_id = #{userId}
+    </select>
+</mapper>

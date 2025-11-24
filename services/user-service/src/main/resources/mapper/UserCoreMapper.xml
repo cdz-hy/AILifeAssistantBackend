@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.user.mapper.UserCoreMapper">
+    <resultMap id="UserCoreResult" type="org.example.user.entity.UserCore">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="long" resultMap="UserCoreResult">
+        select * from t_user where id = #{id}
+    </select>
+
+    <select id="findByUsername" parameterType="string" resultMap="UserCoreResult">
+        select * from t_user where username = #{username}
+    </select>
+
+    <insert id="insert" parameterType="org.example.user.entity.UserCore" useGeneratedKeys="true" keyProperty="id">
+        insert into t_user(username, password_hash, email, phone)
+        values(#{username}, #{passwordHash}, #{email}, #{phone})
+    </insert>
+
+    <update id="updateEmail">
+        update t_user set email = #{email} where id = #{id}
+    </update>
+</mapper>

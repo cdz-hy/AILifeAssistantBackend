@@ -3,6 +3,7 @@ package org.example.schedule.service.impl;
 import org.example.schedule.entity.Schedule;
 import org.example.schedule.mapper.*;
 import org.example.schedule.service.ScheduleManagementService;
+import org.example.schedule.service.impl.ScheduleLifecycleService;
 import org.example.schedule.util.RRuleUtils;
 import org.example.schedule.util.RecurrenceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ public class ScheduleManagementServiceImpl implements ScheduleManagementService 
 
     @Autowired
     private ScheduleAISuggestionMapper scheduleAISuggestionMapper;
+
+    @Autowired
+    private ScheduleLifecycleService scheduleLifecycleService;
 
     @Override
     public Schedule getScheduleById(Long id) {
@@ -506,6 +510,10 @@ public class ScheduleManagementServiceImpl implements ScheduleManagementService 
         schedule.setCreatedAt(LocalDateTime.now());
         schedule.setUpdatedAt(LocalDateTime.now());
         scheduleMapper.insert(schedule);
+        
+        // 创建日程生命周期任务
+        scheduleLifecycleService.createOrUpdateScheduleLifecycle(schedule);
+        
         return schedule;
     }
 
@@ -514,6 +522,10 @@ public class ScheduleManagementServiceImpl implements ScheduleManagementService 
     public Schedule updateSchedule(Schedule schedule) {
         schedule.setUpdatedAt(LocalDateTime.now());
         scheduleMapper.update(schedule);
+        
+        // 更新日程生命周期任务
+        scheduleLifecycleService.createOrUpdateScheduleLifecycle(schedule);
+        
         return schedule;
     }
 

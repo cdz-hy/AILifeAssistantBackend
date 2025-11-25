@@ -24,6 +24,9 @@ public interface NotificationMapper {
     @Update("UPDATE t_notification_log SET status = #{status} WHERE id = #{id}")
     int updateNotificationStatus(@Param("id") Long id, @Param("status") String status);
 
+    @Update("UPDATE t_notification_log SET status = #{status} WHERE user_id = #{userId} AND status != #{status}")
+    int updateAllNotificationsStatusByUserId(@Param("userId") Long userId, @Param("status") String status);
+
     // Notification Preference
     @Insert("INSERT INTO t_notification_preference (user_id, event_type, channel, alert_type, is_enabled) " +
             "VALUES (#{userId}, #{eventType}, #{channel}, #{alertType}, #{isEnabled})")

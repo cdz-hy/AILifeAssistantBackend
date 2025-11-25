@@ -14,7 +14,7 @@
     
     <select id="selectByUserIdAndDate" parameterType="map" resultMap="GeneratedReportResultMap">
         SELECT * FROM t_generated_report 
-        WHERE user_id = #{userId} AND report_type = #{reportType} AND start_date &lt;= #{date} AND end_date &gt;= #{date}
+        WHERE user_id = #{userId} AND report_type = #{reportType} AND DATE(start_date) = DATE(#{date})
         ORDER BY created_at DESC
         LIMIT 1
     </select>

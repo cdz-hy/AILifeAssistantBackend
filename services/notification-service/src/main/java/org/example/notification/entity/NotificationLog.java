@@ -45,4 +45,17 @@ public class NotificationLog {
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    @Override
+    public String toString() {
+        return "NotificationLog{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", content='" + content + '\'' +
+                ", channel='" + channel + '\'' +
+                ", status='" + status + '\'' +
+                ", sourceEventType='" + sourceEventType + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 }

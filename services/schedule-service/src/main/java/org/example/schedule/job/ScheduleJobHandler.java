@@ -1,5 +1,6 @@
 package org.example.schedule.job;
 
+import org.example.notification.dto.NotificationRequest;
 import org.example.schedule.entity.Schedule;
 import org.example.schedule.mapper.ScheduleMapper;
 import org.example.schedule.service.NotificationServiceClient;
@@ -54,12 +55,20 @@ public class ScheduleJobHandler {
 
         // 2. 执行业务：调用通知服务
         String content = "您的日程即将开始：" + currentSchedule.getTitle();
-        notificationServiceClient.sendNotification(
+        NotificationRequest request = new NotificationRequest(
                 currentSchedule.getUserId(),
                 content,
                 "schedule_reminder",
-                "push"
+                "high"
         );
+        
+        // 在控制台输出发送的通知内容
+        System.out.println("发送日程提醒通知 - 用户ID: " + request.getUserId() + 
+                          ", 内容: " + request.getContent() + 
+                          ", 事件类型: " + request.getSourceEventType() + 
+                          ", 优先级: " + request.getPriority());
+        
+        notificationServiceClient.sendNotification(request);
     }
 
     /**
@@ -84,6 +93,23 @@ public class ScheduleJobHandler {
             currentSchedule.setStatus("in_progress");
             scheduleMapper.update(currentSchedule);
             System.out.println("日程已自动标记为进行中");
+            
+            // 发送日程开始通知
+            String content = "您的日程已经开始：" + currentSchedule.getTitle();
+            NotificationRequest request = new NotificationRequest(
+                    currentSchedule.getUserId(),
+                    content,
+                    "schedule_start",
+                    "medium"
+            );
+            
+            // 在控制台输出发送的通知内容
+            System.out.println("发送日程开始通知 - 用户ID: " + request.getUserId() + 
+                              ", 内容: " + request.getContent() + 
+                              ", 事件类型: " + request.getSourceEventType() + 
+                              ", 优先级: " + request.getPriority());
+            
+            notificationServiceClient.sendNotification(request);
         }
     }
 
@@ -108,5 +134,22 @@ public class ScheduleJobHandler {
         currentSchedule.setStatus("completed");
         scheduleMapper.update(currentSchedule);
         System.out.println("日程已自动标记为已完成");
+        
+        // 发送日程结束通知
+        String content = "您的日程已经结束：" + currentSchedule.getTitle();
+        NotificationRequest request = new NotificationRequest(
+                currentSchedule.getUserId(),
+                content,
+                "schedule_end",
+                "medium"
+        );
+        
+        // 在控制台输出发送的通知内容
+        System.out.println("发送日程结束通知 - 用户ID: " + request.getUserId() + 
+                          ", 内容: " + request.getContent() + 
+                          ", 事件类型: " + request.getSourceEventType() + 
+                          ", 优先级: " + request.getPriority());
+        
+        notificationServiceClient.sendNotification(request);
     }
 }

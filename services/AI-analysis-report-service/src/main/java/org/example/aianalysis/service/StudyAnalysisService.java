@@ -386,7 +386,7 @@ public class StudyAnalysisService {
                 "[\n" +
                 "  {\n" +
                 "    \"type\": \"focus_praise\" | \"procrastination_alert\" | \"method_tip\" | \"empathy\" | \"fragmentation_warning\",\n" +
-                "    \"title\": \"简短标题（带emoji）\",\n" +
+                "    \"title\": \"简短标题（带黑白emoji）\",\n" +
                 "    \"content\": \"详细分析和建议（50字以内）\",\n" +
                 "    \"action\": \"具体可执行的行动建议\"\n" +
                 "  }\n" +

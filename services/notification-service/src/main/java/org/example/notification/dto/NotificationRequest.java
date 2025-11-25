@@ -27,4 +27,14 @@ public class NotificationRequest {
 
     public String getPriority() { return priority; }
     public void setPriority(String priority) { this.priority = priority; }
+
+    @Override
+    public String toString() {
+        return "NotificationRequest{" +
+                "userId=" + userId +
+                ", content='" + content + '\'' +
+                ", sourceEventType='" + sourceEventType + '\'' +
+                ", priority='" + priority + '\'' +
+                '}';
+    }
 }

@@ -21,4 +21,28 @@ public interface StudyServiceClient {
      */
     @GetMapping("/api/study/user/{userId}")
     List<Map<String, Object>> getStudyRecordsByUserId(@PathVariable("userId") Long userId);
+    
+    /**
+     * 获取用户的专注会话列表
+     * @param userId 用户ID
+     * @return 专注会话列表
+     */
+    @GetMapping("/study/api/focus/user/{userId}/sessions")
+    List<Map<String, Object>> getUserFocusSessions(@PathVariable("userId") Long userId);
+    
+    /**
+     * 获取用户的总学习时长（分钟）
+     * @param userId 用户ID
+     * @return 总学习时长
+     */
+    @GetMapping("/study/api/focus/user/{userId}/total-time")
+    Integer getTotalStudyTime(@PathVariable("userId") Long userId);
+    
+    /**
+     * 获取用户的学习任务列表
+     * @param userId 用户ID
+     * @return 学习任务列表
+     */
+    @GetMapping("/study/api/study-tasks/user/{userId}")
+    List<Map<String, Object>> getUserStudyTasks(@PathVariable("userId") Long userId);
 }

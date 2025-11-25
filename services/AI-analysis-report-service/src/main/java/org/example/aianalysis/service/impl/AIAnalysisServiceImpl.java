@@ -13,6 +13,8 @@ import org.example.aianalysis.service.LLMClient;
 import org.example.aianalysis.service.ScheduleAnalysisService;
 import org.example.aianalysis.service.FinanceAnalysisService;
 import org.example.aianalysis.service.DietAnalysisService;
+import org.example.aianalysis.service.ComprehensiveAnalysisService;
+import org.example.aianalysis.service.StudyAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,12 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
 
     @Autowired
     private DietAnalysisService dietAnalysisService;
+    
+    @Autowired
+    private ComprehensiveAnalysisService comprehensiveAnalysisService;
+    
+    @Autowired
+    private StudyAnalysisService studyAnalysisService;
     
     @Override
     public GeneratedReport getDailyReportByDate(Long userId, LocalDate date) {
@@ -90,20 +98,17 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
         GeneratedReport existingReport = getDailyReportByDate(userId, date);
         // 即使存在缓存也重新生成报告（每2小时强制更新）
         
-        // 从Nacos配置中心获取API地址和Key
-        String apiUrl = nacosConfig.getAiModelApiUrl();
-        String apiKey = nacosConfig.getAiModelApiKey();
+        // 调用综合分析服务生成跨领域分析报告
+        String analysisResult = comprehensiveAnalysisService.generateDailyComprehensiveReport(userId, date);
         
-        // 生成新的报告（使用占位符）
+        // 生成新的报告
         GeneratedReport report = new GeneratedReport();
         report.setUserId(userId);
         report.setReportType("daily");
         report.setStartDate(date);
         report.setEndDate(date);
-        report.setCreatedAt(java.time.LocalDateTime.now());
-        
-        // 占位符：实际应调用AI分析API
-        report.setReportDataJson("{\"type\":\"daily\",\"date\":\"" + date + "\",\"summary\":\"今日综合分析报告占位符\",\"apiUrl\":\"" + apiUrl + "\",\"apiKey\":\"" + apiKey + "\"}");
+        report.setCreatedAt(LocalDateTime.now());
+        report.setReportDataJson(analysisResult != null ? analysisResult : "{\"type\":\"daily\",\"date\":\"" + date + "\",\"summary\":\"今日综合分析报告生成失败\"}");
         
         if (existingReport != null) {
             // 更新现有报告
@@ -213,15 +218,17 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
         GeneratedReport existingReport = generatedReportMapper.selectByUserIdAndDate(userId, "daily_study", date);
         // 即使存在缓存也重新生成报告（每2小时强制更新）
         
-        // TODO: 实现学习数据分析逻辑
-        // 生成新的报告（使用占位符）
+        // 调用学习分析服务进行真实的学习数据分析
+        String analysisResult = studyAnalysisService.analyzeDailyStudy(userId);
+        
+        // 生成新的报告
         GeneratedReport report = new GeneratedReport();
         report.setUserId(userId);
         report.setReportType("daily_study");
         report.setStartDate(date);
         report.setEndDate(date);
         report.setCreatedAt(LocalDateTime.now());
-        report.setReportDataJson("{\"type\":\"daily_study\",\"date\":\"" + date + "\",\"summary\":\"今日学习分析报告占位符\"}");
+        report.setReportDataJson(analysisResult != null ? analysisResult : "{\"type\":\"daily_study\",\"date\":\"" + date + "\",\"summary\":\"今日学习分析报告占位符\"}");
         
         if (existingReport != null) {
             // 更新现有报告

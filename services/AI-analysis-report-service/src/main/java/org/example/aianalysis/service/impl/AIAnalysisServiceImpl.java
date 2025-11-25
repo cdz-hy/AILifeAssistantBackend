@@ -12,6 +12,7 @@ import org.example.aianalysis.service.AIAnalysisService;
 import org.example.aianalysis.service.LLMClient;
 import org.example.aianalysis.service.ScheduleAnalysisService;
 import org.example.aianalysis.service.FinanceAnalysisService;
+import org.example.aianalysis.service.DietAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,9 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
     
     @Autowired
     private FinanceAnalysisService financeAnalysisService;
+
+    @Autowired
+    private DietAnalysisService dietAnalysisService;
     
     @Override
     public GeneratedReport getDailyReportByDate(Long userId, LocalDate date) {
@@ -236,15 +240,17 @@ public class AIAnalysisServiceImpl implements AIAnalysisService {
         GeneratedReport existingReport = generatedReportMapper.selectByUserIdAndDate(userId, "daily_diet", date);
         // 即使存在缓存也重新生成报告（每2小时强制更新）
         
-        // TODO: 实现饮食数据分析逻辑
-        // 生成新的报告（使用占位符）
+        // 实现饮食数据分析逻辑
+        String analysisResult = dietAnalysisService.analyzeDailyDiet(userId);
+        
+        // 生成新的报告
         GeneratedReport report = new GeneratedReport();
         report.setUserId(userId);
         report.setReportType("daily_diet");
         report.setStartDate(date);
         report.setEndDate(date);
         report.setCreatedAt(LocalDateTime.now());
-        report.setReportDataJson("{\"type\":\"daily_diet\",\"date\":\"" + date + "\",\"summary\":\"今日饮食分析报告占位符\"}");
+        report.setReportDataJson(analysisResult != null ? analysisResult : "{\"type\":\"daily_diet\",\"date\":\"" + date + "\",\"summary\":\"今日饮食分析报告占位符\"}");
         
         if (existingReport != null) {
             // 更新现有报告

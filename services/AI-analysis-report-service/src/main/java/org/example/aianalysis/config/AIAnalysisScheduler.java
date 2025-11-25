@@ -36,7 +36,7 @@ public class AIAnalysisScheduler {
      * 每10分钟执行一次日综合分析任务
      * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
      */
-    @Scheduled(fixedRate = 10 * 60 * 1000) // 每10分钟执行一次
+    @Scheduled(fixedRate = 30 * 60 * 1000) // 每30分钟执行一次
     public void scheduleDailyComprehensiveAnalysis() {
         LocalDateTime now = LocalDateTime.now();
         nextExecutionTime = now.plusMinutes(10);
@@ -61,7 +61,7 @@ public class AIAnalysisScheduler {
      * 每10分钟执行一次日日程分析任务
      * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
      */
-    @Scheduled(fixedRate = 10 * 60 * 1000) // 每10分钟执行一次
+    @Scheduled(fixedRate = 30 * 60 * 1000) // 每30分钟执行一次
     public void scheduleDailyScheduleAnalysis() {
         LocalDateTime now = LocalDateTime.now();
         // 只在用户活跃时间段执行
@@ -84,7 +84,7 @@ public class AIAnalysisScheduler {
      * 每10分钟执行一次日财务分析任务
      * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
      */
-    @Scheduled(fixedRate = 10 * 60 * 1000) // 每10分钟执行一次
+    @Scheduled(fixedRate = 30 * 60 * 1000) // 每30分钟执行一次
     public void scheduleDailyFinanceAnalysis() {
         LocalDateTime now = LocalDateTime.now();
         // 只在用户活跃时间段执行
@@ -107,7 +107,7 @@ public class AIAnalysisScheduler {
      * 每10分钟执行一次日学习分析任务
      * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
      */
-    @Scheduled(fixedRate = 10 * 60 * 1000) // 每10分钟执行一次
+    @Scheduled(fixedRate = 30 * 60 * 1000) // 每30分钟执行一次
     public void scheduleDailyStudyAnalysis() {
         LocalDateTime now = LocalDateTime.now();
         // 只在用户活跃时间段执行
@@ -130,7 +130,7 @@ public class AIAnalysisScheduler {
      * 每10分钟执行一次日饮食分析任务
      * 仅在用户活跃时间段执行（例如 8:00 - 22:00）
      */
-    @Scheduled(fixedRate = 10 * 60 * 1000) // 每10分钟执行一次
+    @Scheduled(fixedRate = 30 * 60 * 1000) // 每30分钟执行一次
     public void scheduleDailyDietAnalysis() {
         LocalDateTime now = LocalDateTime.now();
         // 只在用户活跃时间段执行
